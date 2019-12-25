@@ -21,3 +21,11 @@ class EmptyPoint(pygame.sprite.Sprite):
 
     def update(self):
         self.play_sound()
+
+
+class EmptyObject(EmptyPoint):
+    def __init__(self, position, size, path_sound=None):
+        super().__init__(position, path_sound)
+
+        self.size.size = size
+
