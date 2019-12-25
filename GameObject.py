@@ -3,22 +3,21 @@ import pygame
 FPS = 60
 
 
-class GameObject(pygame.sprite.Sprite):
-
-    """Абстрактный класс. Предстовляет из себя простой игровой обьект"""
-
-    def __init__(self, position, sound_path=None):
+class EmptyPoint(pygame.sprite.Sprite):
+    def __init__(self, position, path_sound=None):
         super().__init__()
 
-        self.position = position
-        self.sound = pygame.mixer.music.load(sound_path)
+        self.size = pygame.Rect(position, (1, 1))
+        if path_sound:
+            self.sound = pygame.mixer.sound(path_sound)
+        self.sound = None
 
-    def play_sond(self):
+    def get_position(self):
+        return self.size.x, self.size.y
+
+    def play_sound(self):
         if self.sound:
             self.sound.play()
 
-    def get_position(self):
-        return self.position
-
     def update(self):
-        pass
+        self.play_sound()
