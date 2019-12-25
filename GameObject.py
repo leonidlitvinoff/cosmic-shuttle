@@ -29,3 +29,9 @@ class EmptyObject(EmptyPoint):
 
         self.size.size = size
 
+    def get_size(self):
+        return self.size.size
+
+    def get_rect(self):
+        return self.size
+
