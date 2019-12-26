@@ -114,7 +114,7 @@ class AnimatedVisibleObject(VisibleObject):
                 self.frames.append(sheet.subsurface(pygame.Rect(
                     frame_location, self.rect.size)))
 
-    def update(self):
+    def update(self, surface):
         super().update()
 
         self.counter_anim += 1
@@ -124,3 +124,24 @@ class AnimatedVisibleObject(VisibleObject):
             self.image = self.frames[self.cur_frame]
             self.counter_anim = 0
 
+        surface.blit(self.image)
+
+
+class AnimVisMovObj(AnimatedVisibleObject):
+    def __init__(self, position, path_image, columns, rows, collidepoint_type=None, path_sound=None, cur_frame=0, speed_anim=1, speed_move=1):
+        super().__init__(position, path_image, columns, rows, collidepoint_type, path_sound, cur_frame, speed_anim)
+
+        if type(speed_move) == int:
+            speed_move = FPS // speed_move
+            self.speed_move = (speed_move, speed_move)
+        else:
+            self.speed_move = (FPS // speed_move[0], FPS // speed_move[1])
+
+    def move_x(self):
+        self.rect.move(self.speed_move[0], 0)
+
+    def move_y(self):
+        self.rect.move(0, self.speed_move[1])
+
+    def update(self, surface):
+        super().update(surface)
