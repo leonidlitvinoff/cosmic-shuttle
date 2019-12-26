@@ -91,11 +91,14 @@ class VisibleMovingObject(VisibleObject):
 
 
 class AnimatedVisibleObject(VisibleObject):
-    def __init__(self, position, path_image, columns, rows, collidepoint_type=None, path_sound=None, cur_frame=0):
+    def __init__(self, position, path_image, columns, rows, collidepoint_type=None, path_sound=None, cur_frame=0, speed_anim=1):
         super().__init__(position, path_image, collidepoint_type, path_sound)
 
         self.frames = []
         self.cur_frame = cur_frame
+
+        self.speed_anim = FPS // speed_anim
+        self.counter_anim = 0
 
         self.col = columns
         self.row = rows
@@ -114,7 +117,10 @@ class AnimatedVisibleObject(VisibleObject):
     def update(self):
         super().update()
 
-        self.cur_frame = (self.cur_frame + 1) % len(self.frames)
-        self.image = self.frames[self.cur_frame]
+        self.counter_anim += 1
 
+        if self.counter_anim >= self.speed_anim:
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+            self.image = self.frames[self.cur_frame]
+            self.counter_anim = 0
 
