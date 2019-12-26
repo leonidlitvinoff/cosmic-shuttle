@@ -40,11 +40,22 @@ class TransparentObject(EmptyObject):
     def __init__(self, position, size, collidepoint_type=None, path_sound=None):
         super().__init__(position, size, path_sound)
 
+        self.mask = None
+        self.radius = None
+
         if collidepoint_type:
             if type(collidepoint_type) == str:
                 self.mask = pygame.mask.from_surface(pygame.image.load(collidepoint_type))
             elif type(collidepoint_type) == int:
-                self.r = collidepoint_type
+                self.radius = collidepoint_type
             elif len(collidepoint_type) == 2 and type(collidepoint_type[0]) == str and type(collidepoint_type[1]) == int:
                 self.mask = pygame.mask.from_surface(pygame.image.load(collidepoint_type[0]), threshold=collidepoint_type[1])
 
+
+class VisibleObject(TransparentObject):
+    def __init__(self, position, path_image, collidepoint_type=None, path_sound=None):
+        self.image = pygame.image.load(path_image)
+
+        super().__init__(position, self.image.get_size(), collidepoint_type, path_sound)
+
+        self.image.set_masks(self.mask)
