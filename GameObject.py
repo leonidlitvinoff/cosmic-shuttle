@@ -58,7 +58,8 @@ class VisibleObject(TransparentObject):
 
         super().__init__(position, self.image.get_size(), collidepoint_type, path_sound)
 
-        self.image.set_masks(self.mask)
+        if self.mask:
+            self.image.set_masks(self.mask)
 
     def draw_on_surface(self, surface, position=None):
         if position:
@@ -69,13 +70,21 @@ class VisibleObject(TransparentObject):
 
 class VisibleMovingObject(VisibleObject):
     def __init__(self, position, path_image, collidepoint_type=None, path_sound=None, speed_move=1):
-        self.image = pygame.image.load(path_image)
-
-        super().__init__(position, self.image.get_size(), collidepoint_type, path_sound)
-
-        self.image.set_masks(self.mask)
+        super().__init__(position, path_image, collidepoint_type, path_sound)
 
         if type(speed_move) == int:
+            speed_move = FPS // speed_move
             self.speed_move = (speed_move, speed_move)
         else:
-            self.speed_move = tuple(speed_move)
+            self.speed_move = (FPS // speed_move[0], FPS // speed_move[1])
+
+    def move_x(self):
+        self.rect.move(self.speed_move[0], 0)
+
+    def move_y(self):
+        self.rect.move(0, self.speed_move[1])
+
+    def update(self, surface):
+        super().update()
+
+        surface.blit(self.image)
