@@ -88,3 +88,33 @@ class VisibleMovingObject(VisibleObject):
         super().update()
 
         surface.blit(self.image)
+
+
+class AnimatedVisibleObject(VisibleObject):
+    def __init__(self, position, path_image, columns, rows, collidepoint_type=None, path_sound=None, cur_frame=0):
+        super().__init__(position, path_image, collidepoint_type, path_sound)
+
+        self.frames = []
+        self.cur_frame = cur_frame
+
+        self.col = columns
+        self.row = rows
+
+        self.cut_sheet(self.image, columns, rows)
+        self.image = self.frames[self.cur_frame]
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect.size = sheet.get_width() // columns, sheet.get_height() // rows
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+
+    def update(self):
+        super().update()
+
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+        self.image = self.frames[self.cur_frame]
+
+
