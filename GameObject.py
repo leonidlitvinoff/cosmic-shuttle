@@ -60,6 +60,12 @@ class VisibleObject(TransparentObject):
 
         self.image.set_masks(self.mask)
 
+    def draw_on_surface(self, surface, position=None):
+        if position:
+            surface.blit(self.image, position)
+        else:
+            surface.blit(self.image, self.rect)
+
 
 class VisibleMovingObject(VisibleObject):
     def __init__(self, position, path_image, collidepoint_type=None, path_sound=None, speed_move=1):
