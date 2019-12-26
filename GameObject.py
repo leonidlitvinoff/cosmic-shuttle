@@ -79,10 +79,10 @@ class VisibleMovingObject(VisibleObject):
             self.speed_move = (FPS // speed_move[0], FPS // speed_move[1])
 
     def move_x(self):
-        self.rect.move(self.speed_move[0], 0)
+        self.rect.move_ip(self.speed_move[0], 0)
 
     def move_y(self):
-        self.rect.move(0, self.speed_move[1])
+        self.rect.move_ip(0, self.speed_move[1])
 
     def update(self, surface):
         super().update()
