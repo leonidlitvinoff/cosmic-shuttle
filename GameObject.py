@@ -59,3 +59,17 @@ class VisibleObject(TransparentObject):
         super().__init__(position, self.image.get_size(), collidepoint_type, path_sound)
 
         self.image.set_masks(self.mask)
+
+
+class VisibleMovingObject(VisibleObject):
+    def __init__(self, position, path_image, collidepoint_type=None, path_sound=None, speed_move=1):
+        self.image = pygame.image.load(path_image)
+
+        super().__init__(position, self.image.get_size(), collidepoint_type, path_sound)
+
+        self.image.set_masks(self.mask)
+
+        if type(speed_move) == int:
+            self.speed_move = (speed_move, speed_move)
+        else:
+            self.speed_move = tuple(speed_move)
