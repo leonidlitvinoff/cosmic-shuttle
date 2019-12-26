@@ -87,7 +87,7 @@ class VisibleMovingObject(VisibleObject):
     def update(self, surface):
         super().update()
 
-        surface.blit(self.image)
+        surface.blit(self.image, self.get_position())
 
 
 class AnimatedVisibleObject(VisibleObject):
@@ -124,7 +124,7 @@ class AnimatedVisibleObject(VisibleObject):
             self.image = self.frames[self.cur_frame]
             self.counter_anim = 0
 
-        surface.blit(self.image)
+        surface.blit(self.image, self.get_position())
 
 
 class AnimVisMovObj(AnimatedVisibleObject):
