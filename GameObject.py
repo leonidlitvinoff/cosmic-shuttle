@@ -49,7 +49,7 @@ class TransparentObject(EmptyObject):
 
 
 class VisibleObject(TransparentObject):
-    def __init__(self, position, path_image, collidepoint_type=None, path_sound=None):
+    def __init__(self, position, path_image, collidepoint_type=None, path_sound=None, animation=None):
         self.image = pygame.image.load(path_image)
 
         super().__init__(position, self.image.get_size(), collidepoint_type, path_sound)
@@ -57,16 +57,44 @@ class VisibleObject(TransparentObject):
         if self.mask:
             self.image.set_masks(self.mask)
 
-    def draw_on_surface(self, surface, position=None):
-        if position:
-            surface.blit(self.image, position)
-        else:
-            surface.blit(self.image, self.rect)
+        if animation:
+            self.frames = []
+            self.cur_frame = animation[2] if len(animation) == 3 else 1
+
+            self.speed_anim = FPS // animation[3] if len(animation) == 4 else 0
+            self.counter_anim = 0
+
+            self.col = animation[0]
+            self.row = animation[1]
+
+            self.rect.size = self.image.get_width() // self.col, self.image.get_height() // self.row
+
+            for j in range(self.row):
+                for i in range(self.col):
+                    frame_location = (self.rect.w * i, self.rect.h * j)
+                    self.frames.append(self.image.subsurface(pygame.Rect(
+                        frame_location, self.rect.size)))
+            self.image = self.frames[self.cur_frame]
+
+        self.animation = animation
+
+    def update(self, surface):
+        super().update()
+
+        if self.animation:
+            self.counter_anim += 1
+
+            if self.counter_anim >= self.speed_anim:
+                self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+                self.image = self.frames[self.cur_frame]
+                self.counter_anim = 0
+
+        surface.blit(self.image, self.get_position())
 
 
 class VisibleMovingObject(VisibleObject):
-    def __init__(self, position, path_image, collidepoint_type=None, path_sound=None, speed_move=1):
-        super().__init__(position, path_image, collidepoint_type, path_sound)
+    def __init__(self, position, path_image, collidepoint_type=None, path_sound=None, speed_move=1, animation=None):
+        super().__init__(position, path_image, collidepoint_type, path_sound, animation)
 
         if type(speed_move) == int:
             speed_move = FPS // speed_move
@@ -74,70 +102,14 @@ class VisibleMovingObject(VisibleObject):
         else:
             self.speed_move = (FPS // speed_move[0], FPS // speed_move[1])
 
-    def move_x(self):
-        self.rect.move_ip(self.speed_move[0], 0)
-
-    def move_y(self):
-        self.rect.move_ip(0, self.speed_move[1])
-
-    def update(self, surface):
-        super().update()
-
-        surface.blit(self.image, self.get_position())
-
-
-class AnimatedVisibleObject(VisibleObject):
-    def __init__(self, position, path_image, columns, rows, collidepoint_type=None, path_sound=None, cur_frame=0, speed_anim=1):
-        super().__init__(position, path_image, collidepoint_type, path_sound)
-
-        self.frames = []
-        self.cur_frame = cur_frame
-
-        self.speed_anim = FPS // speed_anim
-        self.counter_anim = 0
-
-        self.col = columns
-        self.row = rows
-
-        self.cut_sheet(self.image, columns, rows)
-        self.image = self.frames[self.cur_frame]
-
-    def cut_sheet(self, sheet, columns, rows):
-        self.rect.size = sheet.get_width() // columns, sheet.get_height() // rows
-        for j in range(rows):
-            for i in range(columns):
-                frame_location = (self.rect.w * i, self.rect.h * j)
-                self.frames.append(sheet.subsurface(pygame.Rect(
-                    frame_location, self.rect.size)))
-
-    def update(self, surface):
-        super().update()
-
-        self.counter_anim += 1
-
-        if self.counter_anim >= self.speed_anim:
-            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
-            self.image = self.frames[self.cur_frame]
-            self.counter_anim = 0
-
-        surface.blit(self.image, self.get_position())
-
-
-class AnimVisMovObj(AnimatedVisibleObject):
-    def __init__(self, position, path_image, columns, rows, collidepoint_type=None, path_sound=None, cur_frame=0, speed_anim=1, speed_move=1):
-        super().__init__(position, path_image, columns, rows, collidepoint_type, path_sound, cur_frame, speed_anim)
-
-        if type(speed_move) == int:
-            speed_move = FPS // speed_move
-            self.speed_move = (speed_move, speed_move)
+    def move_x(self, strs=None):
+        if strs:
+            self.rect.move_ip(-self.speed_move[0], 0)
         else:
-            self.speed_move = (FPS // speed_move[0], FPS // speed_move[1])
+            self.rect.move_ip(self.speed_move[0], 0)
 
-    def move_x(self):
-        self.rect.move(self.speed_move[0], 0)
-
-    def move_y(self):
-        self.rect.move(0, self.speed_move[1])
-
-    def update(self, surface):
-        super().update(surface)
+    def move_y(self, strs=None):
+        if strs:
+            self.rect.move_ip(0, -self.speed_move[1])
+        else:
+            self.rect.move_ip(0, self.speed_move[1])

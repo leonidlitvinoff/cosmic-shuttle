@@ -20,10 +20,12 @@ while not command_exit:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_d:
                 person.move_x()
-                print(person.get_position())
             elif event.key == pygame.K_s:
                 person.move_y()
-                print(person.get_position())
+            elif event.key == pygame.K_w:
+                person.move_y(1)
+            elif event.key == pygame.K_a:
+                person.move_x(1)
 
 
     person.update(screen)
