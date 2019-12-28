@@ -25,6 +25,9 @@ class EmptyObject(pygame.sprite.Sprite):
     def get_rect(self):
         return self.rect
 
+    def shift(self, position):
+        self.rect.move_ip(*position)
+
     def update(self):
         self.play_sound()
 
