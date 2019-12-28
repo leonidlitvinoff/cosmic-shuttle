@@ -4,7 +4,6 @@ import GameObject
 FPS = 60
 
 path_from_person = 'Data\\Image\\Person.jpg'
-
 person = GameObject.VisibleMovingObject((0, 0), path_from_person)
 
 screen = pygame.display.set_mode((800, 600))
