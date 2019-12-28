@@ -3,11 +3,11 @@ import pygame
 FPS = 60
 
 
-class EmptyPoint(pygame.sprite.Sprite):
-    def __init__(self, position, path_sound=None):
+class EmptyObject(pygame.sprite.Sprite):
+    def __init__(self, position, size=(1, 1), path_sound=None):
         super().__init__()
 
-        self.rect = pygame.Rect(position, (1, 1))
+        self.rect = pygame.Rect(position, size)
         if path_sound:
             self.sound = pygame.mixer.sound(path_sound)
         self.sound = None
@@ -19,21 +19,14 @@ class EmptyPoint(pygame.sprite.Sprite):
         if self.sound:
             self.sound.play()
 
-    def update(self):
-        self.play_sound()
-
-
-class EmptyObject(EmptyPoint):
-    def __init__(self, position, size, path_sound=None):
-        super().__init__(position, path_sound)
-
-        self.rect.size = size
-
     def get_size(self):
         return self.rect.size
 
     def get_rect(self):
         return self.rect
+
+    def update(self):
+        self.play_sound()
 
 
 class TransparentObject(EmptyObject):
