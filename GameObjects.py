@@ -42,6 +42,52 @@ class Camera(EmptyObject):
         return self.screen
 
 
+class MovingCamera(Camera):
+    def __init__(self, traffic_restriction=(None, None), current_position=(0, 0), size=(0, 0), path_sound=None, flags=0, speed_move=1, max_speed_increase=2, distance_start_move=5):
+        super().__init__(current_position, size, path_sound, flags)
+
+        if type(speed_move) == int:
+            self.speed_move = (speed_move, speed_move)
+        elif len(speed_move) == 2:
+            self.speed_move = speed_move
+
+        self.max_speed_increase = max_speed_increase
+        self.distance_start_move = distance_start_move
+
+        self.dx, self.dy = current_position
+
+        self.traf_x, self.traf_y = traffic_restriction
+
+    def update(self, all_sprite, *arg, **kwargs):
+        super().update(arg, kwargs)
+
+        mouse_pos = pygame.mouse.get_pos()
+        w, h = self.get_size()
+        all_sprite = all_sprite
+
+        x, y = 0, 0
+
+        up_bar = h * self.distance_start_move // 100
+        left_bar = w * self.distance_start_move // 100
+        down_bar = h * (100 - self.distance_start_move) // 100
+        right_bar = w * (100 - self.distance_start_move) // 100
+
+        if mouse_pos[0] < left_bar and self.dx < 0:
+            x += round(self.speed_move[0] + self.speed_move[0] * self.max_speed_increase * (left_bar - mouse_pos[0]) / left_bar)
+        if mouse_pos[0] > right_bar and (not self.traf_x or self.dx > -self.traf_x + w):
+            x -= round(self.speed_move[0] + self.speed_move[0] * self.max_speed_increase * (mouse_pos[0] - right_bar) / (w - right_bar))
+        if mouse_pos[1] < up_bar and self.dy < 0:
+            y += round(self.speed_move[1] + self.speed_move[1] * self.max_speed_increase * (up_bar - mouse_pos[1]) / up_bar)
+        if mouse_pos[1] > down_bar and (not self.traf_y or self.dy > -self.traf_y + h):
+            y -= round(self.speed_move[1] + self.speed_move[1] * self.max_speed_increase * (mouse_pos[1] - down_bar) / (h - down_bar))
+
+        for sprite in all_sprite.sprites():
+            sprite.shift((x, y))
+
+        self.dx += x
+        self.dy += y
+
+
 class TransparentObject(EmptyObject):
     def __init__(self, position, size, collidepoint_type=None, path_sound=None):
         super().__init__(position, size, path_sound)
