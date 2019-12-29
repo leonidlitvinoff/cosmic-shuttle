@@ -7,7 +7,7 @@ path_from_person = 'Data\\Image\\Person.jpg'
 
 all_sprite = pygame.sprite.Group()
 
-person = GameObject.VisibleMovingObject((0, 0), path_from_person, hp=100)
+person = GameObject.GameObject((0, 0), path_from_person, hp=100, speed_move=(60, 120))
 
 all_sprite.add(person)
 
@@ -22,17 +22,18 @@ while not command_exit:
         if event.type == pygame.QUIT:
             command_exit = True
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_d:
-                person.move_x()
-            elif event.key == pygame.K_s:
-                person.move_y()
-            elif event.key == pygame.K_w:
-                person.move_y(1)
-            elif event.key == pygame.K_a:
-                person.move_x(1)
-            elif event.key == pygame.K_SPACE:
+            if event.key == pygame.K_SPACE:
                 person.hit(10)
 
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_d]:
+        person.move_x()
+    if keys[pygame.K_a]:
+        person.move_x(1)
+    if keys[pygame.K_w]:
+        person.move_y(1)
+    if keys[pygame.K_s]:
+        person.move_y()
 
     all_sprite.update()
     all_sprite.draw(screen)

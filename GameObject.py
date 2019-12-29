@@ -1,4 +1,5 @@
 import pygame
+from fractions import Fraction
 
 FPS = 60
 
@@ -93,22 +94,37 @@ class VisibleMovingObject(VisibleObject):
         super().__init__(position, path_image, collidepoint_type, path_sound, animation)
 
         if type(speed_move) == int:
-            speed_move = FPS // speed_move
-            self.speed_move = (speed_move, speed_move)
+            speed_move = Fraction(speed_move, FPS)
+            speed_move = speed_move.numerator, speed_move.denominator
+            self.speed_move = (*speed_move, *speed_move)
         else:
-            self.speed_move = (FPS // speed_move[0], FPS // speed_move[1])
+            a = Fraction(speed_move[0], FPS)
+            a = a.numerator, a.denominator
+
+            b = Fraction(speed_move[1], FPS)
+            b = b.numerator, b.denominator
+
+            self.speed_move = (*a, *b)
+
+        self.counter_speed = [0, 0]
 
     def move_x(self, strs=None):
-        if strs:
-            self.rect.move_ip(-self.speed_move[0], 0)
-        else:
-            self.rect.move_ip(self.speed_move[0], 0)
+        self.counter_speed[0] += 1
+        if self.counter_speed[0] == self.speed_move[1]:
+            if strs:
+                self.rect.move_ip(-self.speed_move[0], 0)
+            else:
+                self.rect.move_ip(self.speed_move[0], 0)
+            self.counter_speed[0] = 0
 
     def move_y(self, strs=None):
-        if strs:
-            self.rect.move_ip(0, -self.speed_move[1])
-        else:
-            self.rect.move_ip(0, self.speed_move[1])
+        self.counter_speed[1] += 1
+        if self.counter_speed[1] == self.speed_move[3]:
+            if strs:
+                self.rect.move_ip(0, -self.speed_move[2])
+            else:
+                self.rect.move_ip(0, self.speed_move[2])
+            self.counter_speed[1] = 0
 
 
 class GameObject(VisibleMovingObject):
