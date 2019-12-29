@@ -33,6 +33,15 @@ class EmptyObject(pygame.sprite.Sprite):
         self.play_sound()
 
 
+class Camera(EmptyObject):
+    def __init__(self, current_position=(0, 0), size=(0, 0), path_sound=None, flags=0):
+        self.screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
+        super().__init__(current_position, self.screen.get_rect().size, path_sound)
+
+    def get_screen(self):
+        return self.screen
+
+
 class TransparentObject(EmptyObject):
     def __init__(self, position, size, collidepoint_type=None, path_sound=None):
         super().__init__(position, size, path_sound)
