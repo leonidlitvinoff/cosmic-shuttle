@@ -16,7 +16,7 @@ person = GameObject.GameObject((0, 0), path_from_person, hp=100, speed_move=(60,
 all_sprite.add(person)
 
 size_screen = w_screen, h_screen = (800, 600)
-screen = pygame.display.set_mode((800, 600))
+screen = pygame.display.set_mode(size_screen)
 
 clock = pygame.time.Clock()
 
@@ -32,22 +32,22 @@ while not command_exit:
 
     mouse_pos = pygame.mouse.get_pos()
 
-    if mouse_pos[0] < w_screen // 20:
+    if mouse_pos[0] < w_screen // 20 and background.get_position()[0] < 0:
         for sprite in all_sprite.sprites():
             if sprite.get_position()[0] < w_screen:
-                sprite.shift((1, 0))
-    if mouse_pos[0] > w_screen * 95 // 100:
+                sprite.shift((10, 0))
+    if mouse_pos[0] > w_screen * 95 // 100 and background.get_position()[0] > -background.get_size()[0] + w_screen:
         for sprite in all_sprite.sprites():
             if sprite.get_position()[0] < w_screen:
-                sprite.shift((-1, 0))
-    if mouse_pos[1] < h_screen // 20:
+                sprite.shift((-10, 0))
+    if mouse_pos[1] < h_screen // 20 and background.get_position()[1] < 0:
         for sprite in all_sprite.sprites():
             if sprite.get_position()[1] < w_screen:
-                sprite.shift((0, 1))
-    if mouse_pos[1] > h_screen * 95 // 100:
+                sprite.shift((0, 10))
+    if mouse_pos[1] > h_screen * 95 // 100 and background.get_position()[1] > -background.get_size()[1] + h_screen:
         for sprite in all_sprite.sprites():
             if sprite.get_position()[1] < w_screen:
-                sprite.shift((0, -1))
+                sprite.shift((0, -10))
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_d]:
