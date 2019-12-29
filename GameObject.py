@@ -28,7 +28,7 @@ class EmptyObject(pygame.sprite.Sprite):
     def shift(self, position):
         self.rect.move_ip(*position)
 
-    def update(self):
+    def update(self, *arg, **kwargs):
         self.play_sound()
 
 
@@ -76,7 +76,7 @@ class VisibleObject(TransparentObject):
         if self.mask:
             self.image.set_masks(self.mask)
 
-    def update(self):
+    def update(self, *arg, **kwargs):
         super().update()
 
         if self.animation:
@@ -123,7 +123,7 @@ class GameObject(VisibleMovingObject):
         if self.hp <= 0:
             self.kill()
 
-    def update(self):
+    def update(self, *arg, **kwargs):
         super().update()
 
         if self.time_life is not None:
