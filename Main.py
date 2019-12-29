@@ -1,5 +1,5 @@
 import pygame
-import GameObject
+import GameObjects
 
 FPS = 60
 
@@ -8,11 +8,11 @@ path_from_person = 'Data\\Image\\Person.jpg'
 
 all_sprite = pygame.sprite.Group()
 
-background = GameObject.GameObject((0, 0), path_from_background)
+background = GameObjects.GameObject((0, 0), path_from_background)
 all_sprite.add(background)
 
 
-person = GameObject.GameObject((0, 0), path_from_person, hp=100, speed_move=(60, 120))
+person = GameObjects.GameObject((0, 0), path_from_person, hp=100, speed_move=(60, 120))
 all_sprite.add(person)
 
 size_screen = w_screen, h_screen = (800, 600)
