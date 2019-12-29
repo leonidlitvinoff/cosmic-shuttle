@@ -85,7 +85,7 @@ class VisibleObject(TransparentObject):
         if self.hp <= 0:
             self.kill()
 
-    def update(self, surface):
+    def update(self):
         super().update()
 
         if self.animation:
@@ -101,8 +101,6 @@ class VisibleObject(TransparentObject):
                 self.kill()
             else:
                 self.time_life -= 1
-
-        surface.blit(self.image, self.get_position())
 
 
 class VisibleMovingObject(VisibleObject):

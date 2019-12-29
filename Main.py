@@ -5,7 +5,11 @@ FPS = 60
 
 path_from_person = 'Data\\Image\\Person.jpg'
 
+all_sprite = pygame.sprite.Group()
+
 person = GameObject.VisibleMovingObject((0, 0), path_from_person, hp=100)
+
+all_sprite.add(person)
 
 screen = pygame.display.set_mode((800, 600))
 
@@ -26,9 +30,12 @@ while not command_exit:
                 person.move_y(1)
             elif event.key == pygame.K_a:
                 person.move_x(1)
+            elif event.key == pygame.K_SPACE:
+                person.hit(10)
 
 
-    person.update(screen)
+    all_sprite.update()
+    all_sprite.draw(screen)
 
     clock.tick(FPS)
     pygame.display.flip()
