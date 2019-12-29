@@ -106,8 +106,8 @@ class VisibleObject(TransparentObject):
 
 
 class VisibleMovingObject(VisibleObject):
-    def __init__(self, position, path_image, collidepoint_type=None, path_sound=None, speed_move=1, animation=None):
-        super().__init__(position, path_image, collidepoint_type, path_sound, animation)
+    def __init__(self, position, path_image, collidepoint_type=None, path_sound=None, speed_move=1, animation=None, time_life=None, hp=None):
+        super().__init__(position, path_image, collidepoint_type, path_sound, animation, time_life, hp)
 
         if type(speed_move) == int:
             speed_move = FPS // speed_move
