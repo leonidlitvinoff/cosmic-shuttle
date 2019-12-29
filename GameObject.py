@@ -49,13 +49,12 @@ class TransparentObject(EmptyObject):
 
 
 class VisibleObject(TransparentObject):
-    def __init__(self, position, path_image, collidepoint_type=None, path_sound=None, animation=None):
+    def __init__(self, position, path_image, collidepoint_type=None, path_sound=None, animation=None, time_life=None, hp=None):
         self.image = pygame.image.load(path_image)
 
-        super().__init__(position, self.image.get_size(), collidepoint_type, path_sound)
+        self.time_life = time_life
 
-        if self.mask:
-            self.image.set_masks(self.mask)
+        self.hp = hp
 
         if animation:
             self.frames = []
@@ -67,16 +66,24 @@ class VisibleObject(TransparentObject):
             self.col = animation[0]
             self.row = animation[1]
 
-            self.rect.size = self.image.get_width() // self.col, self.image.get_height() // self.row
+            w, h = self.image.get_width() // self.col, self.image.get_height() // self.row
 
             for j in range(self.row):
                 for i in range(self.col):
-                    frame_location = (self.rect.w * i, self.rect.h * j)
-                    self.frames.append(self.image.subsurface(pygame.Rect(
-                        frame_location, self.rect.size)))
+                    frame_location = (w * i, h * j)
+                    self.frames.append(self.image.subsurface(pygame.Rect(frame_location, (w, h))))
             self.image = self.frames[self.cur_frame]
-
         self.animation = animation
+
+        super().__init__(position, self.image.get_size(), collidepoint_type, path_sound)
+
+        if self.mask:
+            self.image.set_masks(self.mask)
+
+    def hit(self, damage):
+        self.hp -= damage
+        if self.hp >= 0:
+            self.kill()
 
     def update(self, surface):
         super().update()
@@ -88,6 +95,12 @@ class VisibleObject(TransparentObject):
                 self.cur_frame = (self.cur_frame + 1) % len(self.frames)
                 self.image = self.frames[self.cur_frame]
                 self.counter_anim = 0
+
+        if self.time_life is not None:
+            if self.time_life == 0:
+                self.kill()
+            else:
+                self.time_life -= 1
 
         surface.blit(self.image, self.get_position())
 
