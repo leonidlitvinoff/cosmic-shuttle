@@ -3,14 +3,19 @@ import GameObject
 
 FPS = 60
 
+path_from_background = 'Data\\Image\\Space_Background.png'
 path_from_person = 'Data\\Image\\Person.jpg'
 
 all_sprite = pygame.sprite.Group()
 
-person = GameObject.GameObject((0, 0), path_from_person, hp=100, speed_move=(60, 120))
+background = GameObject.GameObject((0, 0), path_from_background)
+all_sprite.add(background)
 
+
+person = GameObject.GameObject((0, 0), path_from_person, hp=100, speed_move=(60, 120))
 all_sprite.add(person)
 
+size_screen = w_screen, h_screen = (800, 600)
 screen = pygame.display.set_mode((800, 600))
 
 clock = pygame.time.Clock()
@@ -24,6 +29,25 @@ while not command_exit:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 person.hit(10)
+
+    mouse_pos = pygame.mouse.get_pos()
+
+    if mouse_pos[0] < w_screen // 20:
+        for sprite in all_sprite.sprites():
+            if sprite.get_position()[0] < w_screen:
+                sprite.shift((1, 0))
+    if mouse_pos[0] > w_screen * 95 // 100:
+        for sprite in all_sprite.sprites():
+            if sprite.get_position()[0] < w_screen:
+                sprite.shift((-1, 0))
+    if mouse_pos[1] < h_screen // 20:
+        for sprite in all_sprite.sprites():
+            if sprite.get_position()[1] < w_screen:
+                sprite.shift((0, 1))
+    if mouse_pos[1] > h_screen * 95 // 100:
+        for sprite in all_sprite.sprites():
+            if sprite.get_position()[1] < w_screen:
+                sprite.shift((0, -1))
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_d]:
