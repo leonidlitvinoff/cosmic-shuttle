@@ -82,7 +82,7 @@ class VisibleObject(TransparentObject):
 
     def hit(self, damage):
         self.hp -= damage
-        if self.hp >= 0:
+        if self.hp <= 0:
             self.kill()
 
     def update(self, surface):
