@@ -49,12 +49,8 @@ class TransparentObject(EmptyObject):
 
 
 class VisibleObject(TransparentObject):
-    def __init__(self, position, path_image, collidepoint_type=None, path_sound=None, animation=None, time_life=None, hp=None):
+    def __init__(self, position, path_image, collidepoint_type=None, path_sound=None, animation=None):
         self.image = pygame.image.load(path_image)
-
-        self.time_life = time_life
-
-        self.hp = hp
 
         if animation:
             self.frames = []
@@ -80,11 +76,6 @@ class VisibleObject(TransparentObject):
         if self.mask:
             self.image.set_masks(self.mask)
 
-    def hit(self, damage):
-        self.hp -= damage
-        if self.hp <= 0:
-            self.kill()
-
     def update(self):
         super().update()
 
@@ -96,16 +87,10 @@ class VisibleObject(TransparentObject):
                 self.image = self.frames[self.cur_frame]
                 self.counter_anim = 0
 
-        if self.time_life is not None:
-            if self.time_life == 0:
-                self.kill()
-            else:
-                self.time_life -= 1
-
 
 class VisibleMovingObject(VisibleObject):
-    def __init__(self, position, path_image, collidepoint_type=None, path_sound=None, speed_move=1, animation=None, time_life=None, hp=None):
-        super().__init__(position, path_image, collidepoint_type, path_sound, animation, time_life, hp)
+    def __init__(self, position, path_image, collidepoint_type=None, path_sound=None, speed_move=1, animation=None):
+        super().__init__(position, path_image, collidepoint_type, path_sound, animation)
 
         if type(speed_move) == int:
             speed_move = FPS // speed_move
@@ -124,3 +109,25 @@ class VisibleMovingObject(VisibleObject):
             self.rect.move_ip(0, -self.speed_move[1])
         else:
             self.rect.move_ip(0, self.speed_move[1])
+
+
+class GameObject(VisibleMovingObject):
+    def __init__(self, position, path_image, collidepoint_type=None, path_sound=None, speed_move=0, animation=None, time_life=None, hp=None):
+        super().__init__(position, path_image, collidepoint_type, path_sound, speed_move, animation)
+
+        self.time_life = time_life
+        self.hp = hp
+
+    def hit(self, damage):
+        self.hp -= damage
+        if self.hp <= 0:
+            self.kill()
+
+    def update(self):
+        super().update()
+
+        if self.time_life is not None:
+            if self.time_life == 0:
+                self.kill()
+            else:
+                self.time_life -= 1
