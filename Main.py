@@ -5,14 +5,17 @@ FPS = 60
 
 path_from_background = 'Data\\Image\\Space_Background.png'
 path_from_person = 'Data\\Image\\Person.jpg'
+path_from_planet = 'Data\\Image\\Planet2.png'
 
 all_sprite = pygame.sprite.Group()
 
 background = GameObjects.GameObject((0, 0), path_from_background)
 all_sprite.add(background)
 
+planet = GameObjects.Planet((0, 0), path_from_planet, point_degradation=100)
+all_sprite.add(planet)
 
-person = GameObjects.GameObject((0, 0), path_from_person, hp=100, speed_move=(300, 600))
+person = GameObjects.GameObject((100, 100), path_from_person, hp=100, speed_move=(300, 600))
 all_sprite.add(person)
 
 camera = GameObjects.MovingCamera(traffic_restriction=background.get_size(), speed_move=(2, 3))
