@@ -31,6 +31,8 @@ class EmptyObject(pygame.sprite.Sprite):
         self.rect.move_ip(*position)
 
     def update(self, *arg, **kwargs):
+        super().update(arg)
+
         self.play_sound()
 
 
@@ -83,21 +85,21 @@ class MovingCamera(Camera):
         if mouse_pos[0] < left_bar and self.dx < 0:
             x += round(self.speed_move[0] + self.speed_move[
                 0] * self.max_speed_increase * (
-                                   left_bar - mouse_pos[0]) / left_bar)
+                               left_bar - mouse_pos[0]) / left_bar)
         if mouse_pos[0] > right_bar and (
                 not self.traf_x or self.dx > -self.traf_x + w):
             x -= round(self.speed_move[0] + self.speed_move[
                 0] * self.max_speed_increase * (mouse_pos[0] - right_bar) / (
-                                   w - right_bar))
+                               w - right_bar))
         if mouse_pos[1] < up_bar and self.dy < 0:
             y += round(self.speed_move[1] + self.speed_move[
                 1] * self.max_speed_increase * (
-                                   up_bar - mouse_pos[1]) / up_bar)
+                               up_bar - mouse_pos[1]) / up_bar)
         if mouse_pos[1] > down_bar and (
                 not self.traf_y or self.dy > -self.traf_y + h):
             y -= round(self.speed_move[1] + self.speed_move[
                 1] * self.max_speed_increase * (mouse_pos[1] - down_bar) / (
-                                   h - down_bar))
+                               h - down_bar))
 
         for sprite in all_sprite.sprites():
             sprite.shift((x, y))
@@ -122,7 +124,7 @@ class TransparentObject(EmptyObject):
                 self.radius = collidepoint_type
             elif len(collidepoint_type) == 2 and type(
                     collidepoint_type[0]) == str and type(
-                    collidepoint_type[1]) == int:
+                collidepoint_type[1]) == int:
                 self.mask = pygame.mask.from_surface(
                     pygame.image.load(collidepoint_type[0]),
                     threshold=collidepoint_type[1])
@@ -169,6 +171,13 @@ class VisibleObject(TransparentObject):
                 self.cur_frame = (self.cur_frame + 1) % len(self.frames)
                 self.image = self.frames[self.cur_frame]
                 self.counter_anim = 0
+
+
+class Mouse(VisibleObject):
+    def __init__(self, position, path_image, collidepoint_type=None,
+                 path_sound=None, animation=None):
+        super().__init__(position, path_image, collidepoint_type,
+                         path_sound, animation)
 
 
 class VisibleMovingObject(VisibleObject):
@@ -235,6 +244,7 @@ class GameObject(VisibleMovingObject):
             else:
                 self.time_life -= 1
 
+
 # --------------------------------------
 # Раздел модификаторов к базовым классам
 # --------------------------------------
@@ -245,8 +255,8 @@ class Planet(GameObject):
                  path_sound=None, speed_move=0, animation=None, time_life=None,
                  hp=None, point_degradation=None, money=0, population=2):
         super().__init__(position, path_image, collidepoint_type,
-                 path_sound, speed_move, animation, time_life,
-                 hp)
+                         path_sound, speed_move, animation, time_life,
+                         hp)
         self.money = money
         self.population = population
         self.point_degradation = point_degradation
@@ -257,5 +267,3 @@ class Planet(GameObject):
         if self.population < self.point_degradation:
             self.population += round(self.population * random.random())
             self.money += round(self.population ** 0.5)
-
-

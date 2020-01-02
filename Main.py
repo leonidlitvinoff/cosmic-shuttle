@@ -15,10 +15,10 @@ all_sprite.add(background)
 planet = GameObjects.Planet((0, 0), path_from_planet, point_degradation=100)
 all_sprite.add(planet)
 
-person = GameObjects.GameObject((100, 100), path_from_person, hp=100, speed_move=(300, 600))
+person = GameObjects.GameObject((100, 100), path_from_person, hp=100, speed_move=(33, 66))
 all_sprite.add(person)
 
-camera = GameObjects.MovingCamera(traffic_restriction=background.get_size(), speed_move=(2, 3))
+camera = GameObjects.MovingCamera(traffic_restriction=background.get_size(), speed_move=(2, 3), max_speed_increase=10, distance_start_move=10)
 screen = camera.get_screen()
 
 clock = pygame.time.Clock()
