@@ -185,39 +185,36 @@ class VisibleMovingObject(VisibleObject):
                  path_sound=None, speed_move=1, animation=None):
         super().__init__(position, path_image, collidepoint_type, path_sound,
                          animation)
-
-        if type(speed_move) == int:
-            speed_move = Fraction(speed_move, FPS)
-            speed_move = speed_move.numerator, speed_move.denominator
-            self.speed_move = (*speed_move, *speed_move)
+        if type(speed_move) in (int, float):
+            speed_move = speed_move / FPS
+            self.speed_move = (speed_move, speed_move)
         else:
-            a = Fraction(speed_move[0], FPS)
-            a = a.numerator, a.denominator
+            a = speed_move[0] / FPS
+            b = speed_move[1] / FPS
 
-            b = Fraction(speed_move[1], FPS)
-            b = b.numerator, b.denominator
-
-            self.speed_move = (*a, *b)
+            self.speed_move = (a, b)
 
         self.counter_speed = [0, 0]
 
     def move_x(self, strs=None):
-        self.counter_speed[0] += 1
-        if self.counter_speed[0] == self.speed_move[1]:
+        self.counter_speed[0] += self.speed_move[0]
+        if self.counter_speed[0] >= 1:
+            roun = round(self.counter_speed[0])
             if strs:
-                self.rect.move_ip(-self.speed_move[0], 0)
+                self.rect.move_ip(-roun, 0)
             else:
-                self.rect.move_ip(self.speed_move[0], 0)
-            self.counter_speed[0] = 0
+                self.rect.move_ip(roun, 0)
+            self.counter_speed[0] -= roun
 
     def move_y(self, strs=None):
-        self.counter_speed[1] += 1
-        if self.counter_speed[1] == self.speed_move[3]:
+        self.counter_speed[1] += self.speed_move[1]
+        if self.counter_speed[1] >= 1:
+            roun = round(self.counter_speed[1])
             if strs:
-                self.rect.move_ip(0, -self.speed_move[2])
+                self.rect.move_ip(0, -roun)
             else:
-                self.rect.move_ip(0, self.speed_move[2])
-            self.counter_speed[1] = 0
+                self.rect.move_ip(0, roun)
+            self.counter_speed[1] -= roun
 
 
 class GameObject(VisibleMovingObject):
