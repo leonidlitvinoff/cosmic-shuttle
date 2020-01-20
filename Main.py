@@ -142,7 +142,6 @@ def main(test=False):
                             ('3 - Hard', 'HARD')],
                            onchange=change_difficulty,
                            selector_id='select_difficulty')
-    play_menu.add_option('Another menu', play_submenu)
     play_menu.add_option('Return to main menu', pygameMenu.events.BACK)
     about_menu = pygameMenu.TextMenu(surface,
                                      bgfun=main_background,
