@@ -11,11 +11,12 @@ COLOR_WHITE = (255, 255, 255)
 DIFFICULTY = ['EASY']
 FPS = 60.0
 MENU_BACKGROUND_COLOR = (228, 55, 36)
-WINDOW_SIZE = (1920, 1080)
+WINDOW_SIZE = (1600, 900)
 
 clock = None
 main_menu = None
 surface = None
+
 def change_difficulty(value, difficulty):
     selected, index = value
     print('Selected difficulty: "{0}" ({1}) at index {2}'.format(selected, difficulty, index))
@@ -37,19 +38,19 @@ def play_function(difficulty, font, test=False):
     bg_color = random_color()
     main_menu.disable()
     main_menu.reset(1)
-    path_from_background = 'Data\\Image\\Space_Background.png'
-    path_from_person = 'Data\\Image\\Person.jpg'
+    path_from_background = 'Data\\Image\\Background.png'
+    path_from_person = 'Data\\Image\\Person.png'
     path_from_planet = 'Data\\Image\\Planet2.png'
 
     all_sprite = pygame.sprite.Group()
 
-    background = GameObjects.GameObject((0, 0), path_from_background)
+    background = GameObjects.GameObject((0, 0), path_from_background, collidepoint_type=path_from_background)
     all_sprite.add(background)
 
     planet = GameObjects.Planet((0, 0), path_from_planet, point_degradation=100)
     all_sprite.add(planet)
 
-    person = GameObjects.GameObject((100, 100), path_from_person, hp=100, speed_move=(33, 66))
+    person = GameObjects.GameObject((100, 100), path_from_person, hp=100, speed_move=(300, 600), collidepoint_type=path_from_person)
     all_sprite.add(person)
 
     camera = GameObjects.MovingCamera(traffic_restriction=background.get_size(), speed_move=(2, 3), max_speed_increase=10, distance_start_move=10)
@@ -76,6 +77,10 @@ def play_function(difficulty, font, test=False):
             person.move_y(1)
         if keys[pygame.K_s]:
             person.move_y()
+
+        ab = pygame.sprite.collide_mask(background, person)
+        if ab:
+            print(ab)
 
         all_sprite.update()
         all_sprite.draw(screen)

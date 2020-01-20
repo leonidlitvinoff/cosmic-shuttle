@@ -1,4 +1,3 @@
-from fractions import Fraction
 import pygame
 import random
 
@@ -109,30 +108,17 @@ class MovingCamera(Camera):
 
 
 class TransparentObject(EmptyObject):
-    def __init__(self, position, size, collidepoint_type=None,
-                 path_sound=None):
+    def __init__(self, position, size, path_sound=None):
         super().__init__(position, size, path_sound)
 
-        self.mask = None
-        self.radius = None
-
-        if collidepoint_type:
-            if type(collidepoint_type) == str:
-                self.mask = pygame.mask.from_surface(
-                    pygame.image.load(collidepoint_type))
-            elif type(collidepoint_type) == int:
-                self.radius = collidepoint_type
-            elif len(collidepoint_type) == 2 and type(
-                    collidepoint_type[0]) == str and type(
-                collidepoint_type[1]) == int:
-                self.mask = pygame.mask.from_surface(
-                    pygame.image.load(collidepoint_type[0]),
-                    threshold=collidepoint_type[1])
+    def set_collision_radius(self, radius):
+        self.r = radius
 
 
 class VisibleObject(TransparentObject):
-    def __init__(self, position, path_image, collidepoint_type=None,
-                 path_sound=None, animation=None):
+    def __init__(self, position, path_image,
+                 path_sound=None, animation=None, image_mask=False):
+
         self.image = pygame.image.load(path_image)
 
         if animation:
@@ -155,11 +141,14 @@ class VisibleObject(TransparentObject):
             self.image = self.frames[self.cur_frame]
         self.animation = animation
 
-        super().__init__(position, self.image.get_size(), collidepoint_type,
-                         path_sound)
+        super().__init__(position, self.image.get_size(), path_sound)
 
-        if self.mask:
+        if image_mask:
             self.image.set_masks(self.mask)
+
+    def set_collision_mask(self, mask=None):
+        if mask is None:
+            self.mask = pygame.mask.from_surface(self.image)
 
     def update(self, *arg, **kwargs):
         super().update()
@@ -174,16 +163,16 @@ class VisibleObject(TransparentObject):
 
 
 class Mouse(VisibleObject):
-    def __init__(self, position, path_image, collidepoint_type=None,
+    def __init__(self, position, path_image,
                  path_sound=None, animation=None):
-        super().__init__(position, path_image, collidepoint_type,
+        super().__init__(position, path_image,
                          path_sound, animation)
 
 
 class VisibleMovingObject(VisibleObject):
-    def __init__(self, position, path_image, collidepoint_type=None,
+    def __init__(self, position, path_image,
                  path_sound=None, speed_move=1, animation=None):
-        super().__init__(position, path_image, collidepoint_type, path_sound,
+        super().__init__(position, path_image, path_sound,
                          animation)
         if type(speed_move) in (int, float):
             speed_move = speed_move / FPS
@@ -218,10 +207,10 @@ class VisibleMovingObject(VisibleObject):
 
 
 class GameObject(VisibleMovingObject):
-    def __init__(self, position, path_image, collidepoint_type=None,
+    def __init__(self, position, path_image,
                  path_sound=None, speed_move=0, animation=None, time_life=None,
                  hp=None):
-        super().__init__(position, path_image, collidepoint_type, path_sound,
+        super().__init__(position, path_image, path_sound,
                          speed_move, animation)
 
         self.time_life = time_life
@@ -248,10 +237,10 @@ class GameObject(VisibleMovingObject):
 
 
 class Planet(GameObject):
-    def __init__(self, position, path_image, collidepoint_type=None,
+    def __init__(self, position, path_image,
                  path_sound=None, speed_move=0, animation=None, time_life=None,
                  hp=None, point_degradation=None, money=0, population=2):
-        super().__init__(position, path_image, collidepoint_type,
+        super().__init__(position, path_image,
                          path_sound, speed_move, animation, time_life,
                          hp)
         self.money = money
