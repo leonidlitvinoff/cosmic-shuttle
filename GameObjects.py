@@ -114,10 +114,13 @@ class TransparentObject(EmptyObject):
     def set_collision_radius(self, radius):
         self.r = radius
 
+    def set_collision_mask(self, mask):
+        self.mask = mask
+
 
 class VisibleObject(TransparentObject):
     def __init__(self, position, path_image,
-                 path_sound=None, animation=None, image_mask=False):
+                 path_sound=None, animation=None):
 
         self.image = pygame.image.load(path_image)
 
@@ -143,12 +146,14 @@ class VisibleObject(TransparentObject):
 
         super().__init__(position, self.image.get_size(), path_sound)
 
-        if image_mask:
-            self.image.set_masks(self.mask)
-
     def set_collision_mask(self, mask=None):
         if mask is None:
             self.mask = pygame.mask.from_surface(self.image)
+        else:
+            super().set_collision_mask(mask)
+
+    def disabled_alpha(self):
+        self.image = self.image.convert()
 
     def update(self, *arg, **kwargs):
         super().update()
@@ -178,10 +183,8 @@ class VisibleMovingObject(VisibleObject):
             speed_move = speed_move / FPS
             self.speed_move = (speed_move, speed_move)
         else:
-            a = speed_move[0] / FPS
-            b = speed_move[1] / FPS
-
-            self.speed_move = (a, b)
+            self.speed_move = (speed_move[0] / FPS,
+                               speed_move[1] / FPS)
 
         self.counter_speed = [0, 0]
 
