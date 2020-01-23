@@ -40,17 +40,21 @@ def play_function(difficulty, font, test=False):
     main_menu.reset(1)
     path_from_background = 'Data\\Image\\Background.png'
     path_from_person = 'Data\\Image\\Person.png'
-    path_from_planet = 'Data\\Image\\Planet2.png'
 
     all_sprite = pygame.sprite.Group()
+    visible_objects = pygame.sprite.Group()
 
     background = GameObjects.GameObject((0, 0), path_from_background)
     background.set_mask()
     background.disabled_alpha()
     all_sprite.add(background)
+    visible_objects.add(background)
 
-    person = GameObjects.GameObject((100, 100), path_from_person, hp=100, speed_move=(300, 600))
-    camera = GameObjects.TargetCamera(person, flags=(pygame.FULLSCREEN))
+    person = GameObjects.GameObject((500, 500), path_from_person, hp=100, speed_move=(300, 600))
+    all_sprite.add(person)
+    visible_objects.add(person)
+
+    camera = GameObjects.Camera(flags=(pygame.FULLSCREEN))
     screen = camera.get_screen()
 
     clock = pygame.time.Clock()
@@ -68,23 +72,18 @@ def play_function(difficulty, font, test=False):
         x, y = 0, 0
         keys = pygame.key.get_pressed()
         if keys[pygame.K_d]:
-            x -= 1
-        if keys[pygame.K_a]:
             x += 1
+        if keys[pygame.K_a]:
+            x -= 1
         if keys[pygame.K_w]:
-            y += 1
-        if keys[pygame.K_s]:
             y -= 1
+        if keys[pygame.K_s]:
+            y += 1
 
-        camera.move(all_sprite, (x, y))
-
-        ab = pygame.sprite.collide_mask(background, person)
-        if ab:
-            print(ab)
+        person.move((x, y))
 
         all_sprite.update()
-        all_sprite.draw(screen)
-        screen.blit(person.get_surface(), person.get_rect())
+        visible_objects.draw(screen)
 
         clock.tick(FPS)
         pygame.display.flip()

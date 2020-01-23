@@ -183,41 +183,36 @@ class VisibleMovingObject(VisibleObject):
 
         self.speed_move = new_speed_move
 
-    def move_x(self, revers=False):
-        """Движение по оси x"""
+    def move(self, shift):
+        """Движение по осям"""
+        
+        x, y = 0, 0
 
-        # Ведём счёт
-        self.counter_speed[0] += self.speed_move[0]
+        if shift[0]:
+            # Ведём счёт
+            self.counter_speed[0] += self.speed_move[0]
 
-        if self.counter_speed[0] >= 1:
+            if self.counter_speed[0] >= 1:
 
-            # берём целое число и движемся по оси x
-            roun = int(self.counter_speed[0])
-            if revers:
-                self.rect.move_ip(-roun, 0)
-            else:
-                self.rect.move_ip(roun, 0)
+                # берём целое число и движемся по оси x
+                x = int(self.counter_speed[0])
 
-            # отнимаем от счётчика пройденый путь
-            self.counter_speed[0] -= roun
+                # отнимаем от счётчика пройденый путь
+                self.counter_speed[0] -= x
 
-    def move_y(self, revers=False):
-        """Движение по оси y"""
+        if shift[1]:
+            # Ведём счёт
+            self.counter_speed[1] += self.speed_move[1]
 
-        # Ведём счёт
-        self.counter_speed[1] += self.speed_move[1]
+            if self.counter_speed[1] >= 1:
 
-        if self.counter_speed[1] >= 1:
+                # берём целое число и движемся по оси y
+                y = int(self.counter_speed[1])
 
-            # берём целое число и движемся по оси y
-            roun = int(self.counter_speed[1])
-            if revers:
-                self.rect.move_ip(0, -roun)
-            else:
-                self.rect.move_ip(0, roun)
+                # отнимаем от счётчика пройденый путь
+                self.counter_speed[1] -= y
 
-            # отнимаем от счётчика пройденый путь
-            self.counter_speed[1] -= roun
+        self.rect.move_ip((x * shift[0], y * shift[1]))
 
     def get_speed_move(self):
         """Возращяет скорость передвижения обьекта"""
@@ -300,8 +295,8 @@ class Camera(EmptyObject):
 
 
 class MovingCamera(Camera):
-    def __init__(self, traffic_restriction=(None, None),
-                 current_position=(0, 0), size=(0, 0), path_sound=None,
+    def __init__(self, all_sprite, current_position=(0, 0),
+                 traffic_restriction=(None, None), size=(0, 0), path_sound=None,
                  flags=0, depth=0, display=0, tag='None',
                  name='None'):
         """Иницилизация камеры"""
@@ -313,7 +308,13 @@ class MovingCamera(Camera):
         # Иницилизация новых плюшек
         self.traffic_restriction = traffic_restriction
 
-    def move(self, all_sprite, speed_move, revers=(False, False)):
+        # Сохраняем ссылку на спрайты
+        self.all_sprite = all_sprite
+
+        for sprite in all_sprite.sprites():
+            sprite.shift((-current_position[0], -current_position[1]))
+
+    def move(self, speed_move):
         """Движение по оси x"""
 
         x, y = self.get_position()
@@ -322,48 +323,37 @@ class MovingCamera(Camera):
 
         if not self.traffic_restriction[0] or x + speed_move[0] <= self.traffic_restriction[0]:
             result[0] = True
-            if revers[0]:
-                shift_cor[0] = -speed_move[0]
-            else:
-                shift_cor[0] = speed_move[0]
+            shift_cor[0] = speed_move[0]
         if not self.traffic_restriction[1] or y + speed_move[1] <= self.traffic_restriction[1]:
             result[1] = True
-            if revers[1]:
-                shift_cor[1] = -speed_move[1]
-            else:
-                shift_cor[1] = speed_move[1]
+            shift_cor[1] = speed_move[1]
 
         if shift_cor[0] or shift_cor[1]:
-            for sprite in all_sprite.sprites():
+            for sprite in self.all_sprite.sprites():
                 sprite.shift(shift_cor)
 
         return result
 
 
 class TargetCamera(MovingCamera):
-    def __init__(self, target, traffic_restriction=(None, None), size=(0, 0),
+    def __init__(self, all_sprite, target, traffic_restriction=(None, None), size=(0, 0),
                  path_sound=None, flags=0, depth=0, display=0,
                  tag='None', name='None'):
         """Иницилизация"""
 
         # Иницилизация родителя
-        super().__init__(traffic_restriction,
-                 target.get_position(), size, path_sound,
-                 flags, depth, display, tag,
-                 name)
+        super().__init__(all_sprite, target.get_position(), traffic_restriction, size, path_sound, flags, depth, display, tag, name)
 
         # Сохранение цели
         self.target = target
 
-    def move(self, all_sprite, shift, revers=(False, False)):
+    def move(self, shift):
         """Движение камеры"""
 
         # Если движение успешно всё хорошо
         speed_move = self.target.get_speed_move()
-        x, y = super().move(all_sprite,
-                            (speed_move[0] * shift[0],
-                             speed_move[1] * shift[1]),
-                            revers)
+        x, y = super().move((speed_move[0] * shift[0],
+                             speed_move[1] * shift[1]))
 
         # Если нет двигаем персонажа
         if not x:
