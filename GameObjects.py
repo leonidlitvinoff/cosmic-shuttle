@@ -253,6 +253,16 @@ class GameObject(VisibleMovingObject):
         else:
             return False
 
+    def get_hp(self):
+        """Возвращяет hp обьекта"""
+
+        return self.hp
+
+    def get_time_life(self):
+        """Возвращяет оставшееся время жизни обьекта"""
+
+        return self.time_life
+
     def update_time_life(self):
         """Обновление время жизни"""
 
