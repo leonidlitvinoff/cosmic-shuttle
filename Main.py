@@ -11,7 +11,7 @@ COLOR_WHITE = (255, 255, 255)
 DIFFICULTY = ['EASY']
 FPS = 60.0
 MENU_BACKGROUND_COLOR = (228, 55, 36)
-WINDOW_SIZE = (1920, 1080)
+WINDOW_SIZE = (1600, 900)
 
 clock = None
 main_menu = None
@@ -45,17 +45,13 @@ def play_function(difficulty, font, test=False):
     all_sprite = pygame.sprite.Group()
 
     background = GameObjects.GameObject((0, 0), path_from_background)
-    background.set_collision_mask()
+    background.set_mask()
     background.disabled_alpha()
     all_sprite.add(background)
 
-    planet = GameObjects.Planet((0, 0), path_from_planet, point_degradation=100)
-    all_sprite.add(planet)
-
     person = GameObjects.GameObject((100, 100), path_from_person, hp=100, speed_move=(300, 600))
-    all_sprite.add(person)
 
-    camera = GameObjects.MovingCamera(traffic_restriction=background.get_size(), speed_move=(2, 3), max_speed_increase=10, distance_start_move=10)
+    camera = GameObjects.TargetCamera(person, flags=(pygame.FULLSCREEN))
     screen = camera.get_screen()
 
     clock = pygame.time.Clock()
@@ -70,15 +66,16 @@ def play_function(difficulty, font, test=False):
                 if event.key == pygame.K_SPACE:
                     person.hit(10)
 
+        x, y = 0, 0
         keys = pygame.key.get_pressed()
         if keys[pygame.K_d]:
-            person.move_x()
+            x -= 1
         if keys[pygame.K_a]:
-            person.move_x(1)
+            x += 1
         if keys[pygame.K_w]:
-            person.move_y(1)
+            y += 1
         if keys[pygame.K_s]:
-            person.move_y()
+            y -= 1
 
         ab = pygame.sprite.collide_mask(background, person)
         if ab:
@@ -86,9 +83,10 @@ def play_function(difficulty, font, test=False):
 
         all_sprite.update()
         all_sprite.draw(screen)
+        screen.blit(person.get_surface(), person.get_rect())
 
         clock.tick(FPS)
-        camera.update(all_sprite)
+        camera.update(all_sprite, (x, y))
         pygame.display.flip()
 
 
