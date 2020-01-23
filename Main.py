@@ -50,7 +50,6 @@ def play_function(difficulty, font, test=False):
     all_sprite.add(background)
 
     person = GameObjects.GameObject((100, 100), path_from_person, hp=100, speed_move=(300, 600))
-
     camera = GameObjects.TargetCamera(person, flags=(pygame.FULLSCREEN))
     screen = camera.get_screen()
 
@@ -77,6 +76,8 @@ def play_function(difficulty, font, test=False):
         if keys[pygame.K_s]:
             y -= 1
 
+        camera.move(all_sprite, (x, y))
+
         ab = pygame.sprite.collide_mask(background, person)
         if ab:
             print(ab)
@@ -86,7 +87,6 @@ def play_function(difficulty, font, test=False):
         screen.blit(person.get_surface(), person.get_rect())
 
         clock.tick(FPS)
-        camera.update(all_sprite, (x, y))
         pygame.display.flip()
 
 

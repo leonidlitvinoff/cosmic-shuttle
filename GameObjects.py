@@ -302,6 +302,83 @@ class Camera(EmptyObject):
 class MovingCamera(Camera):
     def __init__(self, traffic_restriction=(None, None),
                  current_position=(0, 0), size=(0, 0), path_sound=None,
+                 flags=0, depth=0, display=0, tag='None',
+                 name='None'):
+        """Иницилизация камеры"""
+
+        # Иницилизация родителей
+        super().__init__(current_position, size, path_sound, flags, depth,
+                         display, tag, name)
+
+        # Иницилизация новых плюшек
+        self.traffic_restriction = traffic_restriction
+
+    def move(self, all_sprite, speed_move, revers=(False, False)):
+        """Движение по оси x"""
+
+        x, y = self.get_position()
+        result = [False, False]
+        shift_cor = [0, 0]
+
+        if not self.traffic_restriction[0] or x + speed_move[0] <= self.traffic_restriction[0]:
+            result[0] = True
+            if revers[0]:
+                shift_cor[0] = -speed_move[0]
+            else:
+                shift_cor[0] = speed_move[0]
+        if not self.traffic_restriction[1] or y + speed_move[1] <= self.traffic_restriction[1]:
+            result[1] = True
+            if revers[1]:
+                shift_cor[1] = -speed_move[1]
+            else:
+                shift_cor[1] = speed_move[1]
+
+        if shift_cor[0] or shift_cor[1]:
+            for sprite in all_sprite.sprites():
+                sprite.shift(shift_cor)
+
+        return result
+
+
+class TargetCamera(MovingCamera):
+    def __init__(self, target, traffic_restriction=(None, None), size=(0, 0),
+                 path_sound=None, flags=0, depth=0, display=0,
+                 tag='None', name='None'):
+        """Иницилизация"""
+
+        # Иницилизация родителя
+        super().__init__(traffic_restriction,
+                 target.get_position(), size, path_sound,
+                 flags, depth, display, tag,
+                 name)
+
+        # Сохранение цели
+        self.target = target
+
+    def move(self, all_sprite, shift, revers=(False, False)):
+        """Движение камеры"""
+
+        # Если движение успешно всё хорошо
+        speed_move = self.target.get_speed_move()
+        x, y = super().move(all_sprite,
+                            (speed_move[0] * shift[0],
+                             speed_move[1] * shift[1]),
+                            revers)
+
+        # Если нет двигаем персонажа
+        if not x:
+            pass
+        if not y:
+            pass
+
+
+# --------------------------------------
+# Раздел модификаторов к базовым классам
+# --------------------------------------
+
+class CameraMovingMouse(Camera):
+    def __init__(self, traffic_restriction=(None, None),
+                 current_position=(0, 0), size=(0, 0), path_sound=None,
                  flags=0, depth=0, display=0, speed_move=1, max_speed_increase=2,
                  distance_start_move=5, tag='None', name='None'):
         super().__init__(current_position, size, path_sound, flags, depth, display, tag, name)
@@ -357,37 +434,3 @@ class MovingCamera(Camera):
         self.dx += x
         self.dy += y
 
-
-class TargetCamera(Camera):
-    def __init__(self, target, size=(0, 0), path_sound=None,
-                 flags=0, depth=0, display=0, tag='None', name='None'):
-        """Иницилизация"""
-
-        # Иницилизация родителя
-        super().__init__(target.get_position(), size, path_sound,
-                 flags, depth, display, tag, name)
-
-        # Сохранение цели
-        self.target = target
-
-    def move(self, all_sprite, shift_cord):
-        """Движение камеры"""
-
-        # Принемаем скорость персонажа и двигаем всех относительно персонажа
-        speed_move = self.target.get_speed_move()
-        for sprite in all_sprite.sprites():
-            sprite.shift((speed_move[0] * shift_cord[0],
-                          speed_move[1] * shift_cord[1]))
-
-    def update(self, all_sprite, shift_cord, *arg, **kwargs):
-        """Обновление обьекта"""
-
-        # Обновление родителя
-        super().update(arg)
-
-        # Обновление движения
-        self.move(all_sprite, shift_cord)
-
-# --------------------------------------
-# Раздел модификаторов к базовым классам
-# --------------------------------------
