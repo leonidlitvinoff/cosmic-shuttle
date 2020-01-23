@@ -5,10 +5,10 @@ FPS = 60
 
 
 class EmptyObject(pygame.sprite.Sprite):
-
     """Пустой обьект"""
 
-    def __init__(self, position, size=(1, 1), path_sound=None, tag='None', name='None'):
+    def __init__(self, position, size=(1, 1), path_sound=None, tag='None',
+                 name='None'):
         """Иницилизация Обьекта"""
         # Иницилизация родителя
         super().__init__()
@@ -80,10 +80,10 @@ class EmptyObject(pygame.sprite.Sprite):
 
 
 class VisibleObject(EmptyObject):
-
     """Видимый обьект"""
 
-    def __init__(self, position, path_image, path_sound=None, animation=None, tag='None', name='None'):
+    def __init__(self, position, path_image, path_sound=None, animation=None,
+                 tag='None', name='None'):
         """Иницилизаця обьекта"""
 
         # Загрузка изображения
@@ -111,7 +111,8 @@ class VisibleObject(EmptyObject):
         self.animation = animation
 
         # Иницилизация родителя
-        super().__init__(position, self.image.get_size(), path_sound, tag, name)
+        super().__init__(position, self.image.get_size(), path_sound, tag,
+                         name)
 
     def set_mask(self, mask=None):
         """Установить маску обьету"""
@@ -157,7 +158,6 @@ class VisibleObject(EmptyObject):
 
 
 class VisibleMovingObject(VisibleObject):
-
     """Видимый обьект способный двигаться"""
 
     def __init__(self, position, path_image, path_sound=None, speed_move=1,
@@ -165,7 +165,8 @@ class VisibleMovingObject(VisibleObject):
         """Иницилизация обьекта"""
 
         # Иницилизация родителя
-        super().__init__(position, path_image, path_sound, animation, tag, name)
+        super().__init__(position, path_image, path_sound, animation, tag,
+                         name)
 
         # Сохранения движения по осям (x, y) в зависимости от типа
         if type(speed_move) in (int, float):
@@ -185,7 +186,7 @@ class VisibleMovingObject(VisibleObject):
 
     def move(self, shift):
         """Движение по осям"""
-        
+
         x, y = 0, 0
 
         if shift[0]:
@@ -193,7 +194,6 @@ class VisibleMovingObject(VisibleObject):
             self.counter_speed[0] += self.speed_move[0]
 
             if self.counter_speed[0] >= 1:
-
                 # берём целое число и движемся по оси x
                 x = int(self.counter_speed[0])
 
@@ -205,7 +205,6 @@ class VisibleMovingObject(VisibleObject):
             self.counter_speed[1] += self.speed_move[1]
 
             if self.counter_speed[1] >= 1:
-
                 # берём целое число и движемся по оси y
                 y = int(self.counter_speed[1])
 
@@ -221,11 +220,11 @@ class VisibleMovingObject(VisibleObject):
 
 
 class GameObject(VisibleMovingObject):
-
     """Полнеценный игровой обьект со всемы функциями"""
 
     def __init__(self, position, path_image, path_sound=None, speed_move=0,
-                 animation=None, time_life=None, hp=None, tag='None', name='None'):
+                 animation=None, time_life=None, hp=None, tag='None',
+                 name='None'):
         """Иницилизация"""
 
         # Иницилизация родителя
@@ -296,7 +295,8 @@ class Camera(EmptyObject):
 
 class MovingCamera(Camera):
     def __init__(self, all_sprite, current_position=(0, 0),
-                 traffic_restriction=(None, None), size=(0, 0), path_sound=None,
+                 traffic_restriction=(None, None), size=(0, 0),
+                 path_sound=None,
                  flags=0, depth=0, display=0, tag='None',
                  name='None'):
         """Иницилизация камеры"""
@@ -311,22 +311,29 @@ class MovingCamera(Camera):
         # Сохраняем ссылку на спрайты
         self.all_sprite = all_sprite
 
+        self.shift_x, self.shift_y = current_position
+
+        # Сдиг всех до точи отсчёта
         for sprite in all_sprite.sprites():
             sprite.shift((-current_position[0], -current_position[1]))
 
     def move(self, speed_move):
         """Движение по оси x"""
 
-        x, y = self.get_position()
+        size_screen = self.screen.get_rect().size
+
         result = [False, False]
         shift_cor = [0, 0]
-
-        if not self.traffic_restriction[0] or x + speed_move[0] <= self.traffic_restriction[0]:
+        if not self.traffic_restriction[0] or 0 <= self.shift_x - speed_move[
+            0] <= self.traffic_restriction[0] - size_screen[0]:
             result[0] = True
             shift_cor[0] = speed_move[0]
-        if not self.traffic_restriction[1] or y + speed_move[1] <= self.traffic_restriction[1]:
+            self.shift_x -= speed_move[0]
+        if not self.traffic_restriction[1] or 0 <= self.shift_y - speed_move[
+            1] <= self.traffic_restriction[1] - size_screen[1]:
             result[1] = True
             shift_cor[1] = speed_move[1]
+            self.shift_y -= speed_move[1]
 
         if shift_cor[0] or shift_cor[1]:
             for sprite in self.all_sprite.sprites():
@@ -336,13 +343,16 @@ class MovingCamera(Camera):
 
 
 class TargetCamera(MovingCamera):
-    def __init__(self, all_sprite, target, traffic_restriction=(None, None), size=(0, 0),
+    def __init__(self, all_sprite, target, traffic_restriction=(None, None),
+                 size=(0, 0),
                  path_sound=None, flags=0, depth=0, display=0,
                  tag='None', name='None'):
         """Иницилизация"""
 
         # Иницилизация родителя
-        super().__init__(all_sprite, target.get_position(), traffic_restriction, size, path_sound, flags, depth, display, tag, name)
+        super().__init__(all_sprite, target.get_position(),
+                         traffic_restriction, size, path_sound, flags, depth,
+                         display, tag, name)
 
         # Сохранение цели
         self.target = target
@@ -369,9 +379,11 @@ class TargetCamera(MovingCamera):
 class CameraMovingMouse(Camera):
     def __init__(self, traffic_restriction=(None, None),
                  current_position=(0, 0), size=(0, 0), path_sound=None,
-                 flags=0, depth=0, display=0, speed_move=1, max_speed_increase=2,
+                 flags=0, depth=0, display=0, speed_move=1,
+                 max_speed_increase=2,
                  distance_start_move=5, tag='None', name='None'):
-        super().__init__(current_position, size, path_sound, flags, depth, display, tag, name)
+        super().__init__(current_position, size, path_sound, flags, depth,
+                         display, tag, name)
 
         if type(speed_move) == int:
             self.speed_move = (speed_move, speed_move)
@@ -384,7 +396,6 @@ class CameraMovingMouse(Camera):
         self.dx, self.dy = current_position
 
         self.traf_x, self.traf_y = traffic_restriction
-
 
     def update(self, all_sprite, *arg, **kwargs):
         super().update(arg, kwargs)
@@ -423,4 +434,3 @@ class CameraMovingMouse(Camera):
 
         self.dx += x
         self.dy += y
-

@@ -3,6 +3,7 @@ import GameObjects
 import pygameMenu
 import os
 from random import randrange
+
 ABOUT = ['Leonid  Litvinov',
          'Stepan  Fedorov']
 COLOR_BACKGROUND = (255, 104, 0)
@@ -17,9 +18,12 @@ clock = None
 main_menu = None
 surface = None
 
+
 def change_difficulty(value, difficulty):
     selected, index = value
-    print('Selected difficulty: "{0}" ({1}) at index {2}'.format(selected, difficulty, index))
+    print('Selected difficulty: "{0}" ({1}) at index {2}'.format(selected,
+                                                                 difficulty,
+                                                                 index))
     DIFFICULTY[0] = difficulty
 
 
@@ -50,11 +54,13 @@ def play_function(difficulty, font, test=False):
     all_sprite.add(background)
     visible_objects.add(background)
 
-    person = GameObjects.GameObject((500, 500), path_from_person, hp=100, speed_move=(300, 600))
-    all_sprite.add(person)
+    person = GameObjects.GameObject((0, 0), path_from_person, hp=100,
+                                    speed_move=(300, 600))
     visible_objects.add(person)
 
-    camera = GameObjects.Camera(flags=(pygame.FULLSCREEN))
+    camera = GameObjects.TargetCamera(all_sprite, person,
+                                      traffic_restriction=background.get_size(),
+                                      flags=(pygame.FULLSCREEN))
     screen = camera.get_screen()
 
     clock = pygame.time.Clock()
@@ -72,15 +78,15 @@ def play_function(difficulty, font, test=False):
         x, y = 0, 0
         keys = pygame.key.get_pressed()
         if keys[pygame.K_d]:
-            x += 1
-        if keys[pygame.K_a]:
             x -= 1
+        if keys[pygame.K_a]:
+            x += 1
         if keys[pygame.K_w]:
-            y -= 1
-        if keys[pygame.K_s]:
             y += 1
+        if keys[pygame.K_s]:
+            y -= 1
 
-        person.move((x, y))
+        camera.move((x, y))
 
         all_sprite.update()
         visible_objects.draw(screen)
@@ -201,4 +207,6 @@ def main(test=False):
         pygame.display.flip()
         if test:
             break
+
+
 main()
