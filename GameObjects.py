@@ -302,7 +302,7 @@ class MovingCamera(Camera):
         """Иницилизация камеры"""
 
         # Иницилизация родителей
-        super().__init__(current_position, size, path_sound, flags, depth,
+        super().__init__((0, 0), size, path_sound, flags, depth,
                          display, tag, name)
 
         # Иницилизация новых плюшек
@@ -310,30 +310,35 @@ class MovingCamera(Camera):
 
         # Сохраняем ссылку на спрайты
         self.all_sprite = all_sprite
+        self.shift_x, self.shift_y = 0, 0
 
-        self.shift_x, self.shift_y = current_position
+        self.move((-current_position[0], -current_position[1]))
+
+    def shift(self, shift_position):
+        """Принудительный сдвиг камеры"""
 
         # Сдиг всех до точи отсчёта
-        for sprite in all_sprite.sprites():
-            sprite.shift((-current_position[0], -current_position[1]))
+        for sprite in self.all_sprite.sprites():
+            sprite.shift((shift_position[0], shift_position[1]))
 
     def move(self, speed_move):
-        """Движение по оси x"""
+        """Движение по осям"""
 
         size_screen = self.screen.get_rect().size
-
         result = [False, False]
         shift_cor = [0, 0]
-        if not self.traffic_restriction[0] or 0 <= self.shift_x - speed_move[
-            0] <= self.traffic_restriction[0] - size_screen[0]:
+
+        if ((not self.traffic_restriction[0]) or
+                (0 >= self.shift_x + speed_move[0] >= size_screen[0] - self.traffic_restriction[0])):
             result[0] = True
             shift_cor[0] = speed_move[0]
-            self.shift_x -= speed_move[0]
-        if not self.traffic_restriction[1] or 0 <= self.shift_y - speed_move[
-            1] <= self.traffic_restriction[1] - size_screen[1]:
+            self.shift_x += speed_move[0]
+
+        if ((not self.traffic_restriction[1]) or
+                (0 >= self.shift_y + speed_move[1] >= size_screen[1] - self.traffic_restriction[1])):
             result[1] = True
             shift_cor[1] = speed_move[1]
-            self.shift_y -= speed_move[1]
+            self.shift_y += speed_move[1]
 
         if shift_cor[0] or shift_cor[1]:
             for sprite in self.all_sprite.sprites():
@@ -344,32 +349,48 @@ class MovingCamera(Camera):
 
 class TargetCamera(MovingCamera):
     def __init__(self, all_sprite, target, traffic_restriction=(None, None),
-                 size=(0, 0),
-                 path_sound=None, flags=0, depth=0, display=0,
+                 size=(0, 0), path_sound=None, flags=0, depth=0, display=0,
                  tag='None', name='None'):
         """Иницилизация"""
+
+        # Сохранение цели
+        self.target = target
 
         # Иницилизация родителя
         super().__init__(all_sprite, target.get_position(),
                          traffic_restriction, size, path_sound, flags, depth,
                          display, tag, name)
 
-        # Сохранение цели
-        self.target = target
+        # Нормализация камеры и сдвижение игрока в центр камеры
+        self.target.shift(tuple(map(lambda x: -x, self.target.get_position())))
 
-    def move(self, shift):
+        tar_w, tar_h = self.target.get_size()
+        w, h = self.get_size()
+        self.const = (w // 2 - tar_w // 2), (h // 2 - tar_h // 2)
+        self.move((-(w // 2 - tar_w // 2), -(h // 2 - tar_h // 2)))
+        target.shift((self.const))
+
+    def sled(self, shift):
         """Движение камеры"""
+        if self.target.get_position()[0]:
+            if (shift[0] == -1 and self.target.get_position()[0] > self.const[0]) or (shift[0] == 1 and self.target.get_position()[0] < self.const[0]):
+                self.target.move((shift[0], 0))
+                shift = (0, shift[1])
+        if self.target.get_position()[1]:
+            if (shift[1] == -1 and self.target.get_position()[1] > self.const[1]) or (shift[1] == 1 and self.target.get_position()[1] < self.const[1]):
+                self.target.move((0, shift[1]))
+                shift = (shift[0], 0)
 
         # Если движение успешно всё хорошо
         speed_move = self.target.get_speed_move()
-        x, y = super().move((speed_move[0] * shift[0],
-                             speed_move[1] * shift[1]))
+        x, y = self.move((-(speed_move[0] * shift[0]),
+                             -(speed_move[1] * shift[1])))
 
         # Если нет двигаем персонажа
         if not x:
-            pass
+            self.target.move((shift[0], 0))
         if not y:
-            pass
+            self.target.move((0, shift[1]))
 
 
 # --------------------------------------

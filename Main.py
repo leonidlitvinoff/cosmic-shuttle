@@ -54,8 +54,8 @@ def play_function(difficulty, font, test=False):
     all_sprite.add(background)
     visible_objects.add(background)
 
-    person = GameObjects.GameObject((0, 0), path_from_person, hp=100,
-                                    speed_move=(300, 600))
+    person = GameObjects.GameObject((900, 900), path_from_person, hp=100,
+                                    speed_move=(600, 600))
     visible_objects.add(person)
 
     camera = GameObjects.TargetCamera(all_sprite, person,
@@ -78,15 +78,15 @@ def play_function(difficulty, font, test=False):
         x, y = 0, 0
         keys = pygame.key.get_pressed()
         if keys[pygame.K_d]:
-            x -= 1
-        if keys[pygame.K_a]:
             x += 1
+        if keys[pygame.K_a]:
+            x -= 1
         if keys[pygame.K_w]:
-            y += 1
-        if keys[pygame.K_s]:
             y -= 1
+        if keys[pygame.K_s]:
+            y += 1
 
-        camera.move((x, y))
+        camera.sled((x, y))
 
         all_sprite.update()
         visible_objects.draw(screen)
