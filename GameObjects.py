@@ -363,15 +363,16 @@ class TargetCamera(MovingCamera):
 
         # Нормализация камеры и сдвижение игрока в центр камеры
         self.target.shift(tuple(map(lambda x: -x, self.target.get_position())))
-
         tar_w, tar_h = self.target.get_size()
         w, h = self.get_size()
         self.const = (w // 2 - tar_w // 2), (h // 2 - tar_h // 2)
         self.move((-(w // 2 - tar_w // 2), -(h // 2 - tar_h // 2)))
-        target.shift((self.const))
+        self.target.shift(self.const)
 
     def sled(self, shift):
         """Движение камеры"""
+
+        # Если цель не в центре сдвигаем цель
         if self.target.get_position()[0]:
             if (shift[0] == -1 and self.target.get_position()[0] > self.const[0]) or (shift[0] == 1 and self.target.get_position()[0] < self.const[0]):
                 self.target.move((shift[0], 0))
@@ -381,21 +382,17 @@ class TargetCamera(MovingCamera):
                 self.target.move((0, shift[1]))
                 shift = (shift[0], 0)
 
-        # Если движение успешно всё хорошо
+        # Если цель в центре и она двигается то всё хорошо
         speed_move = self.target.get_speed_move()
         x, y = self.move((-(speed_move[0] * shift[0]),
                              -(speed_move[1] * shift[1])))
 
-        # Если нет двигаем персонажа
+        # Если нет двигаем цель
         if not x:
             self.target.move((shift[0], 0))
         if not y:
             self.target.move((0, shift[1]))
 
-
-# --------------------------------------
-# Раздел модификаторов к базовым классам
-# --------------------------------------
 
 class CameraMovingMouse(Camera):
     def __init__(self, traffic_restriction=(None, None),
@@ -455,3 +452,7 @@ class CameraMovingMouse(Camera):
 
         self.dx += x
         self.dy += y
+
+# --------------------------------------
+# Раздел модификаторов к базовым классам
+# --------------------------------------
