@@ -48,6 +48,7 @@ def play_function(difficulty, font, test=False):
 
     all_sprite = pygame.sprite.Group()
     visible_objects = pygame.sprite.Group()
+    bullet = pygame.sprite.Group()
     enemy = pygame.sprite.Group()
 
     background = GameObjects.GameObject((0, 0), path_from_background)
@@ -56,7 +57,7 @@ def play_function(difficulty, font, test=False):
     all_sprite.add(background)
     visible_objects.add(background)
 
-    person = GameObjects.RotatingGameObject((900, 900), path_from_person, hp=100,
+    person = GameObjects.Person((900, 900), path_from_person, hp=10000,
                                     speed_move=(600, 600))
     visible_objects.add(person)
 
@@ -75,7 +76,9 @@ def play_function(difficulty, font, test=False):
                 command_exit = True
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    person.hit(10)
+                    bull = person.shoot()
+                    visible_objects.add(bull)
+                    bullet.add(bull)
 
         x, y = 0, 0
         keys = pygame.key.get_pressed()
@@ -88,23 +91,16 @@ def play_function(difficulty, font, test=False):
         if keys[pygame.K_s]:
             y += 1
 
-
-
-
-
-
-
-
-
-
         camera.sled((x, y))
+
+        bullet.update()
         person.update()
         all_sprite.update()
         visible_objects.draw(screen)
         if not randrange(100):
             zombie = GameObjects.Enemy((randrange(1000), randrange(1000)),
                                        path_from_zombie, speed_move=100,
-                                       target=person, damage=1, rotate=(1, person.get_position))
+                                       target=person, damage=1, rotate=(1, lambda: person.get_rect().center), hp=1)
             all_sprite.add(zombie)
             visible_objects.add(zombie)
             enemy.add(zombie)
@@ -114,6 +110,11 @@ def play_function(difficulty, font, test=False):
         if xer:
             for enem in xer:
                 person.hit(enem.get_damage())
+        xer = pygame.sprite.groupcollide(bullet, enemy, False, False, collided=pygame.sprite.collide_mask)
+        if xer:
+            for x, y in xer.items():
+                y[0].hit(x.damage)
+                x.kill()
 
         clock.tick(FPS)
         pygame.display.flip()
