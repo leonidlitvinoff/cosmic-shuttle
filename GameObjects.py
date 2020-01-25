@@ -1,5 +1,6 @@
 import pygame
 import random
+import math
 
 FPS = 60
 
@@ -278,6 +279,35 @@ class GameObject(VisibleMovingObject):
         self.update_time_life()
 
 
+class RotatingGameObject(GameObject):
+    def __init__(self, position, path_image, path_sound=None, speed_move=0,
+                 animation=None, time_life=None, hp=None, tag='None',
+                 name='None', rotate=(1, pygame.mouse.get_pos)):
+        super().__init__(position, path_image, path_sound, speed_move,
+                         animation, time_life, hp, tag, name)
+
+        # Сохранения вращения
+        self.rotate_speed = rotate[0]
+        self.rotate_func = rotate[1]
+        self.angle = 0
+        self.old_image = self.image
+        self.image = pygame.transform.rotate(self.old_image, self.angle)
+
+    def rotate(self):
+        m_x, m_y = self.rotate_func()
+        x, y = self.get_position()
+        self.angle = math.degrees(math.atan2(m_y - y, m_x - x))
+        self.image = pygame.transform.rotate(self.old_image, self.angle)
+
+    def update(self, *arg, **kwargs):
+        """Обновление обьекта"""
+
+        super().update(arg, kwargs)
+
+        self.rotate()
+
+
+
 class Camera(EmptyObject):
     def __init__(self, current_position=(0, 0), size=(0, 0), path_sound=None,
                  flags=0, depth=0, display=0, tag='None', name='None'):
@@ -458,18 +488,18 @@ class CameraMovingMouse(Camera):
 # --------------------------------------
 
 
-class Enemy(GameObject):
+class Enemy(RotatingGameObject):
 
     """Класс вражеского обьекта"""
 
     def __init__(self, position, path_image, path_sound=None, speed_move=0,
                  animation=None, time_life=None, hp=None, tag='None',
-                 name='None', target=None, damage=0):
+                 name='None', rotate=(1, pygame.mouse.get_pos), target=None, damage=0,):
         """Иницилизация"""
 
         # Иницилизация родителя
         super().__init__(position, path_image, path_sound, speed_move,
-                         animation, time_life, hp, tag, name)
+                         animation, time_life, hp, tag, name, rotate)
 
         self.target = target
         self.damage = damage
@@ -480,8 +510,12 @@ class Enemy(GameObject):
         return self.damage
 
     def update(self, *arg, **kwargs):
+        """Обновление обьекта"""
+
+        # Обновление родителя
         super().update(arg, kwargs)
 
+        # Двигается по осям до персонажа
         tar_x, tar_y = self.target.get_position()
         x, y = self.get_position()
         shift = [0, 0]
@@ -494,3 +528,7 @@ class Enemy(GameObject):
         elif tar_y < y:
             shift[1] = -1
         self.move(shift)
+
+
+class Person(RotatingGameObject):
+    pass

@@ -56,7 +56,7 @@ def play_function(difficulty, font, test=False):
     all_sprite.add(background)
     visible_objects.add(background)
 
-    person = GameObjects.GameObject((900, 900), path_from_person, hp=100,
+    person = GameObjects.RotatingGameObject((900, 900), path_from_person, hp=100,
                                     speed_move=(600, 600))
     visible_objects.add(person)
 
@@ -89,13 +89,13 @@ def play_function(difficulty, font, test=False):
             y += 1
 
         camera.sled((x, y))
-
+        person.update()
         all_sprite.update()
         visible_objects.draw(screen)
         if not randrange(100):
             zombie = GameObjects.Enemy((randrange(1000), randrange(1000)),
                                        path_from_zombie, speed_move=100,
-                                       target=person, damage=1)
+                                       target=person, damage=1, rotate=(1, person.get_position))
             all_sprite.add(zombie)
             visible_objects.add(zombie)
             enemy.add(zombie)
