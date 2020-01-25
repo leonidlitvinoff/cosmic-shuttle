@@ -295,8 +295,8 @@ class RotatingGameObject(GameObject):
 
     def rotate(self):
         m_x, m_y = self.rotate_func()
-        x, y = self.get_position()
-        self.angle = math.degrees(math.atan2(m_y - y, m_x - x))
+        x, y = self.rect.center
+        self.angle = -math.degrees(math.atan2(m_y - y, m_x - x))
         self.image = pygame.transform.rotate(self.old_image, self.angle)
 
     def update(self, *arg, **kwargs):
@@ -305,7 +305,6 @@ class RotatingGameObject(GameObject):
         super().update(arg, kwargs)
 
         self.rotate()
-
 
 
 class Camera(EmptyObject):

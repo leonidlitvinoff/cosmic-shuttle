@@ -88,6 +88,15 @@ def play_function(difficulty, font, test=False):
         if keys[pygame.K_s]:
             y += 1
 
+
+
+
+
+
+
+
+
+
         camera.sled((x, y))
         person.update()
         all_sprite.update()
