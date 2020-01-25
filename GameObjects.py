@@ -456,3 +456,41 @@ class CameraMovingMouse(Camera):
 # --------------------------------------
 # Раздел модификаторов к базовым классам
 # --------------------------------------
+
+
+class Enemy(GameObject):
+
+    """Класс вражеского обьекта"""
+
+    def __init__(self, position, path_image, path_sound=None, speed_move=0,
+                 animation=None, time_life=None, hp=None, tag='None',
+                 name='None', target=None, damage=0):
+        """Иницилизация"""
+
+        # Иницилизация родителя
+        super().__init__(position, path_image, path_sound, speed_move,
+                         animation, time_life, hp, tag, name)
+
+        self.target = target
+        self.damage = damage
+
+    def get_damage(self):
+        """Возращяет урон который может нанести обьект"""
+
+        return self.damage
+
+    def update(self, *arg, **kwargs):
+        super().update(arg, kwargs)
+
+        tar_x, tar_y = self.target.get_position()
+        x, y = self.get_position()
+        shift = [0, 0]
+        if tar_x > x:
+            shift[0] = 1
+        elif tar_x < x:
+            shift[0] = -1
+        if tar_y > y:
+            shift[1] = 1
+        elif tar_y < y:
+            shift[1] = -1
+        self.move(shift)

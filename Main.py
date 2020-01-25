@@ -44,9 +44,11 @@ def play_function(difficulty, font, test=False):
     main_menu.reset(1)
     path_from_background = 'Data\\Image\\Background.png'
     path_from_person = 'Data\\Image\\Person.png'
+    path_from_zombie = 'Data\\Image\\Zombie.png'
 
     all_sprite = pygame.sprite.Group()
     visible_objects = pygame.sprite.Group()
+    enemy = pygame.sprite.Group()
 
     background = GameObjects.GameObject((0, 0), path_from_background)
     background.set_mask()
@@ -90,6 +92,19 @@ def play_function(difficulty, font, test=False):
 
         all_sprite.update()
         visible_objects.draw(screen)
+        if not randrange(100):
+            zombie = GameObjects.Enemy((randrange(1000), randrange(1000)),
+                                       path_from_zombie, speed_move=100,
+                                       target=person, damage=1)
+            all_sprite.add(zombie)
+            visible_objects.add(zombie)
+            enemy.add(zombie)
+
+        xer = pygame.sprite.spritecollide(person, enemy, False,
+                                          collided=pygame.sprite.collide_mask)
+        if xer:
+            for enem in xer:
+                person.hit(enem.get_damage())
 
         clock.tick(FPS)
         pygame.display.flip()
