@@ -12,7 +12,7 @@ COLOR_WHITE = (255, 255, 255)
 DIFFICULTY = ['EASY']
 FPS = 60.0
 MENU_BACKGROUND_COLOR = (228, 55, 36)
-WINDOW_SIZE = (1600, 900)
+WINDOW_SIZE = (0, 0)
 
 clock = None
 main_menu = None
@@ -119,9 +119,11 @@ def main(test=False):
     global clock
     global main_menu
     global surface
+    global WINDOW_SIZE
     pygame.init()
     os.environ['SDL_VIDEO_CENTERED'] = '1'
-    surface = pygame.display.set_mode(WINDOW_SIZE)
+    surface = pygame.display.set_mode(WINDOW_SIZE, pygame.FULLSCREEN)
+    WINDOW_SIZE = surface.get_size()
     pygame.display.set_caption('Example - Game Selector')
     clock = pygame.time.Clock()
     play_menu = pygameMenu.Menu(surface,
