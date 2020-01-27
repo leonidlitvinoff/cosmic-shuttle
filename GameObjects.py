@@ -191,8 +191,12 @@ class VisibleMovingObject(VisibleObject):
 
     def edit_speed_move(self, new_speed_move):
         """Изменение скорости обьекта"""
-
-        self.speed_move = new_speed_move
+        if type(new_speed_move) in (int, float):
+            speed_move = new_speed_move / FPS
+            self.speed_move = (speed_move, speed_move)
+        else:
+            self.speed_move = (new_speed_move[0] / FPS,
+                               new_speed_move[1] / FPS)
 
     def move(self, shift):
         """Движение по осям"""
@@ -571,7 +575,7 @@ class Enemy(RotatingGameObject):
 class Person(RotatingGameObject):
     def shoot(self):
         """Персонаж совершает выстрел"""
-        
+
         x, y = 0, 0
         if self.angle > 0:
             y = -1

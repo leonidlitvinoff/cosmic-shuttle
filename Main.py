@@ -42,9 +42,13 @@ def play_function(difficulty, font, test=False):
     bg_color = random_color()
     main_menu.disable()
     main_menu.reset(1)
+
+    # Путь до изображений к игре
     path_from_background = 'Data\\Image\\Map1.png'
     path_from_person = 'Data\\Image\\person.png'
     path_from_zombie = 'Data\\Image\\Zombie.png'
+
+    counter_kill = 1000
 
     # Иницилизация групп
     # Сюда входят все обьекты кроме игрока и камеры
@@ -55,6 +59,8 @@ def play_function(difficulty, font, test=False):
     bullet = pygame.sprite.Group()
     # Сюда входят только враги
     enemy = pygame.sprite.Group()
+
+    counter = pygame.font.Font(None, 48)
 
     # Добавления Фона
     background = GameObjects.GameObject((0, 0), path_from_background)
@@ -102,40 +108,39 @@ def play_function(difficulty, font, test=False):
             all_sprite.add(bull)
         camera.sled((x, y))
 
+
         # Обнавление всех обьектов
         person.update()
         all_sprite.update()
         visible_objects.draw(screen)
-        if not randrange(100):
-            zombie = GameObjects.Enemy((randrange(-10, -1, 1), randrange(-10, -1, 1)),
-                                       path_from_zombie, speed_move=100,
-                                       target=person, damage=1, rotate=(1, lambda: person.get_rect().center), hp=1)
+        xol = counter.render(f"Всего убито: {counter_kill}", True, [0, 0, 0])
+        screen.blit(xol, (0, 0))
+        if (True and len(enemy) < 100) or (False and not randrange(1)):
+            zombie = GameObjects.Enemy((randrange(-150, WINDOW_SIZE[0] * 1.5), -150),
+                                       path_from_zombie, speed_move=round(100 + counter_kill ** 0.70),
+                                       target=person, damage=round(1 + counter_kill ** 0.125), rotate=(1, lambda: person.get_rect().center), hp=round(1 + counter_kill ** 0.25))
             all_sprite.add(zombie)
             visible_objects.add(zombie)
             enemy.add(zombie)
 
-        a = pygame.sprite.collide_mask(person, background)
-        if a:
-            x, y = 0, 0
-            if a[0] == 1:
-                x = -1
-            elif a[0] > 1:
-                x = 1
-            if a[1] == 1:
-                y = -1
-            elif a[1] > 0:
-                y = 1
-            camera.sled((x, y))
+        person.edit_speed_move(round(600 + (counter_kill ** 0.5)))
 
         a = pygame.sprite.spritecollide(person, enemy, False,
                                           collided=pygame.sprite.collide_mask)
         if a:
             for enem in a:
                 person.hit(enem.get_damage())
-        a = pygame.sprite.groupcollide(bullet, enemy, False, False, collided=pygame.sprite.collide_mask)
+
+        a = pygame.sprite.groupcollide(bullet, enemy, False, False)
         if a:
             for x, y in a.items():
-                y[0].hit(x.damage)
+                for enemys in y:
+                    if pygame.sprite.collide_mask(x, enemys):
+                        enemys.hit(x.get_damage())
+                        x.kill()
+                        if not enemys.get_hp():
+                            counter_kill += 1
+
 
         clock.tick(FPS)
         pygame.display.flip()
