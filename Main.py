@@ -42,25 +42,32 @@ def play_function(difficulty, font, test=False):
     bg_color = random_color()
     main_menu.disable()
     main_menu.reset(1)
-    path_from_background = 'Data\\Image\\Background.png'
-    path_from_person = 'Data\\Image\\Person.png'
+    path_from_background = 'Data\\Image\\Map1.png'
+    path_from_person = 'Data\\Image\\person.png'
     path_from_zombie = 'Data\\Image\\Zombie.png'
 
+    # Иницилизация групп
+    # Сюда входят все обьекты кроме игрока и камеры
     all_sprite = pygame.sprite.Group()
+    # Сюда входят только видимые обьекты
     visible_objects = pygame.sprite.Group()
+    # Сюда входят только выстрелы
     bullet = pygame.sprite.Group()
+    # Сюда входят только враги
     enemy = pygame.sprite.Group()
 
+    # Добавления Фона
     background = GameObjects.GameObject((0, 0), path_from_background)
     background.set_mask()
     background.disabled_alpha()
     all_sprite.add(background)
     visible_objects.add(background)
 
-    person = GameObjects.Person((900, 900), path_from_person, hp=10000,
-                                    speed_move=(600, 600))
+    # Добавления игрока
+    person = GameObjects.Person((900, 900), path_from_person, hp=10000, speed_move=(600, 600))
     visible_objects.add(person)
 
+    # Создание камеры
     camera = GameObjects.TargetCamera(all_sprite, person,
                                       traffic_restriction=background.get_size(),
                                       flags=(pygame.FULLSCREEN))
@@ -68,17 +75,15 @@ def play_function(difficulty, font, test=False):
 
     clock = pygame.time.Clock()
 
+    # Основной цикл игры
     command_exit = False
     while not command_exit:
         screen.fill((0, 0, 0))
+
+        # Обрабатываем нажаните клавишь
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 command_exit = True
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    bull = person.shoot()
-                    visible_objects.add(bull)
-                    bullet.add(bull)
 
         x, y = 0, 0
         keys = pygame.key.get_pressed()
@@ -90,31 +95,47 @@ def play_function(difficulty, font, test=False):
             y -= 1
         if keys[pygame.K_s]:
             y += 1
-
+        if keys[pygame.K_SPACE]:
+            bull = person.shoot()
+            visible_objects.add(bull)
+            bullet.add(bull)
+            all_sprite.add(bull)
         camera.sled((x, y))
 
-        bullet.update()
+        # Обнавление всех обьектов
         person.update()
         all_sprite.update()
         visible_objects.draw(screen)
         if not randrange(100):
-            zombie = GameObjects.Enemy((randrange(1000), randrange(1000)),
+            zombie = GameObjects.Enemy((randrange(-10, -1, 1), randrange(-10, -1, 1)),
                                        path_from_zombie, speed_move=100,
                                        target=person, damage=1, rotate=(1, lambda: person.get_rect().center), hp=1)
             all_sprite.add(zombie)
             visible_objects.add(zombie)
             enemy.add(zombie)
 
-        xer = pygame.sprite.spritecollide(person, enemy, False,
+        a = pygame.sprite.collide_mask(person, background)
+        if a:
+            x, y = 0, 0
+            if a[0] == 1:
+                x = -1
+            elif a[0] > 1:
+                x = 1
+            if a[1] == 1:
+                y = -1
+            elif a[1] > 0:
+                y = 1
+            camera.sled((x, y))
+
+        a = pygame.sprite.spritecollide(person, enemy, False,
                                           collided=pygame.sprite.collide_mask)
-        if xer:
-            for enem in xer:
+        if a:
+            for enem in a:
                 person.hit(enem.get_damage())
-        xer = pygame.sprite.groupcollide(bullet, enemy, False, False, collided=pygame.sprite.collide_mask)
-        if xer:
-            for x, y in xer.items():
+        a = pygame.sprite.groupcollide(bullet, enemy, False, False, collided=pygame.sprite.collide_mask)
+        if a:
+            for x, y in a.items():
                 y[0].hit(x.damage)
-                x.kill()
 
         clock.tick(FPS)
         pygame.display.flip()

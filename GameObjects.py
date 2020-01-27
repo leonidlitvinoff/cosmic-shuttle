@@ -104,7 +104,8 @@ class VisibleObject(EmptyObject):
             self.col = animation[0]
             self.row = animation[1]
 
-            w, h = self.image.get_width() // self.col, self.image.get_height() // self.row
+            w = self.image.get_width() // self.col
+            h = self.image.get_height() // self.row
 
             for j in range(self.row):
                 for i in range(self.col):
@@ -186,7 +187,7 @@ class VisibleMovingObject(VisibleObject):
         if always_moving:
             self.always_moving = always_moving
         else:
-            self.always_moving = False
+            self.always_moving = None
 
     def edit_speed_move(self, new_speed_move):
         """Изменение скорости обьекта"""
@@ -219,7 +220,7 @@ class VisibleMovingObject(VisibleObject):
                 # отнимаем от счётчика пройденый путь
                 self.counter_speed[1] -= y
 
-        self.rect.move_ip((x * shift[0], y * shift[1]))
+        self.rect.move_ip(x * shift[0], y * shift[1])
 
     def get_speed_move(self):
         """Возращяет скорость передвижения обьекта"""
@@ -232,16 +233,17 @@ class VisibleMovingObject(VisibleObject):
         # иницилизация родителя
         super().update(arg, kwargs)
 
-        if self.always_moving:
+        if self.always_moving is not None:
             self.move(self.always_moving)
 
 
 class GameObject(VisibleMovingObject):
-    """Полнеценный игровой обьект со всемы функциями"""
+
+    """Полнеценный игровой обьект"""
 
     def __init__(self, position, path_image, path_sound=None, speed_move=0,
                  animation=None, time_life=None, hp=None, tag='None',
-                 name='None', always_moving=False):
+                 name='None', always_moving=False, damage=0):
         """Иницилизация"""
 
         # Иницилизация родителя
@@ -251,6 +253,7 @@ class GameObject(VisibleMovingObject):
         # Добавление новых возможностей
         self.time_life = time_life
         self.hp = hp
+        self.damage = damage
 
     def hit(self, damage):
         """Получение урона"""
@@ -263,6 +266,11 @@ class GameObject(VisibleMovingObject):
             return True
         else:
             return False
+
+    def get_damage(self):
+        """Возвращяет урон, созданный обьектом"""
+
+        return self.damage
 
     def get_hp(self):
         """Возвращяет hp обьекта"""
@@ -296,11 +304,18 @@ class GameObject(VisibleMovingObject):
 
 
 class RotatingGameObject(GameObject):
+
+    """Полнеценный игровой обьект, который может вращяться"""
+
     def __init__(self, position, path_image, path_sound=None, speed_move=0,
                  animation=None, time_life=None, hp=None, tag='None',
-                 name='None', always_moving=False, rotate=(1, pygame.mouse.get_pos)):
+                 name='None', always_moving=False, damage=0,
+                 rotate=(1, pygame.mouse.get_pos)):
+        """Иницилизация"""
+
+        # Иницилизация родителя
         super().__init__(position, path_image, path_sound, speed_move,
-                         animation, time_life, hp, tag, name, always_moving)
+                         animation, time_life, hp, tag, name, always_moving, damage)
 
         # Сохранения вращения
         self.rotate_speed = rotate[0]
@@ -311,6 +326,8 @@ class RotatingGameObject(GameObject):
         self.vector = (0, 0)
 
     def rotate(self):
+        """Вращение обьекта"""
+
         m_x, m_y = self.rotate_func()
         x, y = self.rect.center
         a, b = m_y - y, m_x - x
@@ -322,8 +339,10 @@ class RotatingGameObject(GameObject):
     def update(self, *arg, **kwargs):
         """Обновление обьекта"""
 
+        # Обновление функций родителя
         super().update(arg, kwargs)
 
+        # Вращение
         self.rotate()
 
 
@@ -339,6 +358,8 @@ class Camera(EmptyObject):
                          path_sound, tag, name)
 
     def get_screen(self):
+        """Возвращяет экран камеры"""
+
         return self.screen
 
 
@@ -507,27 +528,24 @@ class CameraMovingMouse(Camera):
 # --------------------------------------
 
 
+path_to_bullet_from_person = 'Data\\Image\\bullet.png'
+
+
 class Enemy(RotatingGameObject):
 
     """Класс вражеского обьекта"""
 
     def __init__(self, position, path_image, path_sound=None, speed_move=0,
                  animation=None, time_life=None, hp=None, tag='None',
-                 name='None', always_moving=False, rotate=(1, pygame.mouse.get_pos), target=None, damage=0):
+                 name='None', always_moving=False, damage=0, rotate=(1, pygame.mouse.get_pos), target=None):
         """Иницилизация"""
 
         # Иницилизация родителя
         super().__init__(position, path_image, path_sound, speed_move,
                          animation, time_life, hp, tag, name, always_moving,
-                         rotate)
+                         damage, rotate)
 
         self.target = target
-        self.damage = damage
-
-    def get_damage(self):
-        """Возращяет урон который может нанести обьект"""
-
-        return self.damage
 
     def update(self, *arg, **kwargs):
         """Обновление обьекта"""
@@ -552,6 +570,8 @@ class Enemy(RotatingGameObject):
 
 class Person(RotatingGameObject):
     def shoot(self):
+        """Персонаж совершает выстрел"""
+        
         x, y = 0, 0
         if self.angle > 0:
             y = -1
@@ -561,6 +581,4 @@ class Person(RotatingGameObject):
             x = 1
         elif 90 < self.angle < 180 or -90 > self.angle > -180:
             x = -1
-        a = VisibleMovingObject(self.get_position(), path_image=pygame.transform.rotozoom(pygame.image.load('Data\\Image\\bullet.png'), self.angle, 0.1), speed_move=(10000 * abs(self.vector[0]), 10000 * abs(self.vector[1])), always_moving=(x, y))
-        a.damage = 1
-        return a
+        return GameObject(self.rect.center, path_image=pygame.transform.rotozoom(pygame.image.load(path_to_bullet_from_person), self.angle, 0.1), speed_move=(1000 * abs(self.vector[0]), 1000 * abs(self.vector[1])), always_moving=(x, y), damage=1, time_life=50)
