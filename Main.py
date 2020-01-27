@@ -48,7 +48,7 @@ def play_function(difficulty, font, test=False):
     path_from_person = 'Data\\Image\\person.png'
     path_from_zombie = 'Data\\Image\\Zombie.png'
 
-    counter_kill = 1000
+    counter_kill = 0
 
     # Иницилизация групп
     # Сюда входят все обьекты кроме игрока и камеры
@@ -90,6 +90,11 @@ def play_function(difficulty, font, test=False):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 command_exit = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_z:
+                    counter_kill += 100
+                elif event.key == pygame.K_g:
+                    counter_kill = 0
 
         x, y = 0, 0
         keys = pygame.key.get_pressed()
@@ -117,8 +122,8 @@ def play_function(difficulty, font, test=False):
         screen.blit(xol, (0, 0))
         if (True and len(enemy) < 100) or (False and not randrange(1)):
             zombie = GameObjects.Enemy((randrange(-150, WINDOW_SIZE[0] * 1.5), -150),
-                                       path_from_zombie, speed_move=round(100 + counter_kill ** 0.70),
-                                       target=person, damage=round(1 + counter_kill ** 0.125), rotate=(1, lambda: person.get_rect().center), hp=round(1 + counter_kill ** 0.25))
+                                       path_from_zombie, speed_move=randrange(100, round(101 + counter_kill ** 0.70)),
+                                       target=person, damage=randrange(1, round(2 + counter_kill ** 0.125)), rotate=(1, lambda: person.get_rect().center), hp=randrange(1, round(2 + counter_kill ** 0.25)))
             all_sprite.add(zombie)
             visible_objects.add(zombie)
             enemy.add(zombie)
