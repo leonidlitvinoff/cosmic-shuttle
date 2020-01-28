@@ -509,6 +509,13 @@ class Enemy(RotatingGameObject):
 
         return self.damage
 
+    def hit(self, damage):
+        super().hit(damage)
+
+        if not random.randrange(25):
+            speed = self.get_speed_move()
+            self.edit_speed_move((speed[0] * FPS * 2, speed[1] * FPS * 2))
+
     def update(self, *arg, **kwargs):
         """Обновление обьекта"""
 
@@ -516,7 +523,17 @@ class Enemy(RotatingGameObject):
         super().update(arg, kwargs)
 
         # Двигается по осям до персонажа
-        tar_x, tar_y = self.target.get_position()
+        var = random.randrange(5)
+        if var == 4:
+            tar_x, tar_y = self.target.get_rect().topright
+        elif var == 3:
+            tar_x, tar_y = self.target.get_rect().bottomright
+        elif var == 2:
+            tar_x, tar_y = self.target.get_rect().bottomleft
+        elif var == 1:
+            tar_x, tar_y = self.target.get_rect().topleft
+        else:
+            tar_x, tar_y = self.target.get_rect().center
         x, y = self.get_position()
         shift = [0, 0]
         if tar_x > x:
