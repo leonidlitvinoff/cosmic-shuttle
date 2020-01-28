@@ -2,7 +2,7 @@ import pygame
 import GameObjects
 import pygameMenu
 import os
-from random import randrange
+from random import randrange, choice
 
 ABOUT = ['Leonid  Litvinov',
          'Stepan  Fedorov']
@@ -47,9 +47,14 @@ def play_function(difficulty, font, test=False):
 
     # Путь до изображений к игре
     path_from_background = 'Data\\Image\\Map1.png'
-    path_from_person = pygame.image.load('Data\\Image\\person.png')
-    path_from_person = pygame.transform.scale(path_from_person, (path_from_person.get_rect().w // 2, path_from_person.get_rect().h // 2))
-    path_from_zombie = 'Data\\Image\\Zombie.png'
+    path_from_person = pygame.image.load('Data\\Image\\12345.png')
+    #path_from_person = pygame.transform.scale(path_from_person, (path_from_person.get_rect().w // 2, path_from_person.get_rect().h // 2))
+    path_from_person = pygame.transform.scale2x(path_from_person)
+    path_from_zombie = ['Data\\Image\\Zombie.png',
+                        'Data\\Image\\Zombie1.png',
+                        'Data\\Image\\Zombie2.png',
+                        'Data\\Image\\Zombie3.png',
+                        'Data\\Image\\Zombie4.png']
 
     if DIFFICULTY[0] == 'EASY':
         add_hp, add_speed, add_damage = 0.0625, 0.0625, 0.0625
@@ -72,6 +77,7 @@ def play_function(difficulty, font, test=False):
 
     counter = pygame.font.Font(None, 48)
     damage_indicator = pygame.font.Font(None, 16)
+    hp_indicator = pygame.font.Font(None, 32)
 
     # Добавления Фона
     background = GameObjects.GameObject((0, 0), path_from_background)
@@ -92,83 +98,95 @@ def play_function(difficulty, font, test=False):
 
     clock = pygame.time.Clock()
 
+    pause = False
+
     # Основной цикл игры
     command_exit = False
-    while not command_exit:
+    while not command_exit and person.get_hp() > 0:
         screen.fill((0, 0, 0))
 
         # Обрабатываем нажаните клавишь
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 command_exit = True
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pause = not pause
                 if event.key == pygame.K_z:
                     counter_kill += 100
                 elif event.key == pygame.K_g:
                     counter_kill = 0
+        if not pause:
+            x, y = 0, 0
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_d]:
+                x += 1
+            if keys[pygame.K_a]:
+                x -= 1
+            if keys[pygame.K_w]:
+                y -= 1
+            if keys[pygame.K_s]:
+                y += 1
+            if keys[pygame.K_SPACE]:
+                bull = person.shoot()
+                visible_objects.add(bull)
+                bullet.add(bull)
+                all_sprite.add(bull)
+            camera.sled((x, y))
 
-        x, y = 0, 0
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_d]:
-            x += 1
-        if keys[pygame.K_a]:
-            x -= 1
-        if keys[pygame.K_w]:
-            y -= 1
-        if keys[pygame.K_s]:
-            y += 1
-        if keys[pygame.K_SPACE]:
-            bull = person.shoot()
-            visible_objects.add(bull)
-            bullet.add(bull)
-            all_sprite.add(bull)
-        camera.sled((x, y))
 
+            # Обнавление всех обьектов
+            person.update()
+            all_sprite.update()
 
-        # Обнавление всех обьектов
-        person.update()
-        all_sprite.update()
+            if (True and len(enemy) < 100) or (False and not randrange(1)):
+                zombie = GameObjects.Enemy((randrange(-150, WINDOW_SIZE[0] * 1.5), -150),
+                                           choice(path_from_zombie), speed_move=randrange(100, round(101 + counter_kill * add_speed)),
+                                           target=person, damage=randrange(1, round(2 + counter_kill * add_damage)), rotate=(1, lambda: person.get_rect().center), hp=randrange(1, round(2 + counter_kill * add_hp)))
+                all_sprite.add(zombie)
+                visible_objects.add(zombie)
+                enemy.add(zombie)
+
+            person.edit_speed_move(round(600 + (counter_kill ** 0.5)))
+
+            a = pygame.sprite.spritecollide(person, enemy, False, collided=pygame.sprite.collide_rect)
+            if a:
+                for enem in a:
+                    if pygame.sprite.collide_mask(person, enem):
+                        person.hit(enem.get_damage())
+                        pos = person.get_rect().center
+                        indicator = GameObjects.GameObject(
+                            (pos[0] + randrange(25), pos[1] + randrange(25)),
+                            path_image=damage_indicator.render(
+                                str(-enem.get_damage()), True, (255, 255, 0)),
+                            time_life=10)
+                        indicator.add(all_sprite, visible_objects)
+
+            a = pygame.sprite.groupcollide(bullet, enemy, False, False)
+            if a:
+                for x, y in a.items():
+                    for enemys in y:
+                        if pygame.sprite.collide_mask(x, enemys):
+                            enemys.hit(x.get_damage())
+                            pos = enemys.get_rect().center
+                            indicator = GameObjects.GameObject((pos[0] + randrange(25), pos[1] + randrange(25)), path_image=damage_indicator.render(str(-x.get_damage()), True, (255, 0, 0)), time_life=10)
+                            indicator.add(all_sprite, visible_objects)
+                            x.kill()
+                            if not enemys.get_hp():
+                                counter_kill += 1
+
         visible_objects.draw(screen)
         xol = counter.render(f"Всего убито: {counter_kill}", True, [0, 0, 0])
         screen.blit(xol, (0, 0))
-        if (True and len(enemy) < 100) or (False and not randrange(1)):
-            zombie = GameObjects.Enemy((randrange(-150, WINDOW_SIZE[0] * 1.5), -150),
-                                       path_from_zombie, speed_move=randrange(100, round(101 + counter_kill * add_speed)),
-                                       target=person, damage=randrange(1, round(2 + counter_kill * add_damage)), rotate=(1, lambda: person.get_rect().center), hp=randrange(1, round(2 + counter_kill * add_hp)))
-            all_sprite.add(zombie)
-            visible_objects.add(zombie)
-            enemy.add(zombie)
-
-        person.edit_speed_move(round(600 + (counter_kill ** 0.5)))
-
-        a = pygame.sprite.spritecollide(person, enemy, False, collided=pygame.sprite.collide_rect)
-        if a:
-            for enem in a:
-                if pygame.sprite.collide_mask(person, enem):
-                    person.hit(enem.get_damage())
-                    pos = person.get_rect().center
-                    indicator = GameObjects.GameObject(
-                        (pos[0] + randrange(25), pos[1] + randrange(25)),
-                        path_image=damage_indicator.render(
-                            str(-enem.get_damage()), True, (255, 255, 0)),
-                        time_life=10)
-                    indicator.add(all_sprite, visible_objects)
-
-        a = pygame.sprite.groupcollide(bullet, enemy, False, False)
-        if a:
-            for x, y in a.items():
-                for enemys in y:
-                    if pygame.sprite.collide_mask(x, enemys):
-                        enemys.hit(x.get_damage())
-                        pos = enemys.get_rect().center
-                        indicator = GameObjects.GameObject((pos[0] + randrange(25), pos[1] + randrange(25)), path_image=damage_indicator.render(str(-x.get_damage()), True, (255, 0, 0)), time_life=10)
-                        indicator.add(all_sprite, visible_objects)
-                        x.kill()
-                        if not enemys.get_hp():
-                            counter_kill += 1
-
-
+        xol = counter.render(f"Hp: {person.get_hp()}", True, [255, 0, 255])
+        screen.blit(xol, (WINDOW_SIZE[0] - xol.get_rect().size[0], WINDOW_SIZE[1] - xol.get_rect().size[1]))
         clock.tick(FPS)
+        pygame.display.flip()
+
+    # Вывод конечного экрана
+    while True:
+        screen.blit(pygame.transform.scale(pygame.image.load("Data\\Image\\End.jpg"),
+                                           WINDOW_SIZE), (0, 0))
         pygame.display.flip()
 
 

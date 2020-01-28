@@ -276,6 +276,10 @@ class GameObject(VisibleMovingObject):
 
         return self.damage
 
+    def edit_damge(self, damage):
+
+        self.damage = damage
+
     def get_hp(self):
         """Возвращяет hp обьекта"""
 
@@ -336,7 +340,10 @@ class RotatingGameObject(GameObject):
         x, y = self.rect.center
         a, b = m_y - y, m_x - x
         c = (a ** 2 + b ** 2) ** 0.5
-        self.vector = (b / c, a / c)
+        try:
+            self.vector = (b / c, a / c)
+        except ZeroDivisionError:
+            self.vector = (0, 0)
         self.angle = -math.degrees(math.atan2(m_y - y, m_x - x))
         self.image = pygame.transform.rotate(self.old_image, self.angle)
 
@@ -554,9 +561,14 @@ class Enemy(RotatingGameObject):
     def hit(self, damage):
         super().hit(damage)
 
-        if not random.randrange(25):
-            speed = self.get_speed_move()
-            self.edit_speed_move((speed[0] * FPS * 2, speed[1] * FPS * 2))
+        if not random.randrange(50):
+            if self.speed_move[0] * 2 + 5 < self.target.get_speed_move()[0] and self.speed_move[1] * 2 + 5 < self.target.get_speed_move()[1]:
+                speed = self.get_speed_move()
+                self.edit_speed_move((speed[0] * FPS * 2, speed[1] * FPS * 2))
+                self.edit_damge(self.get_damage() / 2)
+            else:
+                speed = self.target.get_speed_move()
+                self.edit_speed_move((speed[0] * FPS - 100, speed[1] * FPS - 100))
 
     def update(self, *arg, **kwargs):
         """Обновление обьекта"""
@@ -602,4 +614,4 @@ class Person(RotatingGameObject):
             x = 1
         elif 90 < self.angle < 180 or -90 > self.angle > -180:
             x = -1
-        return GameObject(self.rect.center, path_image=pygame.transform.rotozoom(pygame.image.load(path_to_bullet_from_person), self.angle, 0.1), speed_move=(1000 * abs(self.vector[0]), 1000 * abs(self.vector[1])), always_moving=(x, y), damage=1, time_life=50)
+        return GameObject(self.rect.center, path_image=pygame.transform.rotozoom(pygame.image.load(path_to_bullet_from_person), self.angle, 0.1), speed_move=(1000 * abs(self.vector[0]), 1000 * abs(self.vector[1])), always_moving=(x, y), damage=random.randrange(1, 11), time_life=50)
