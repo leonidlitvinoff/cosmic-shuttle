@@ -264,7 +264,7 @@ def main(test=False):
     WINDOW_SIZE = surface.get_size()
     clock = pygame.time.Clock()
 
-    cat = pygame.transform.scale(pygame.image.load('C:\\Users\\stf20\\OneDrive\\Desktop\\Яндекс Лицей\\3.png'), (1000, 250))
+    cat = pygame.transform.scale(pygame.image.load('Data\\Image\\3.png'), (1000, 250))
 
     cat = GameObjects.GameObject((0, 0), cat, animation=(4, 1, 1, 1))
     surface.blit(cat.get_surface(), cat.get_position())
@@ -362,7 +362,7 @@ def main(test=False):
     main_menu.add_option('About', about_menu)
     main_menu.add_option('Quit', pygameMenu.events.EXIT)
 
-    pygame.mixer.music.load('C:\\Users\\stf20\\Downloads\\lolka.ogg')
+    pygame.mixer.music.load('Data\\Sound\\lolka.ogg')
     pygame.mixer.music.set_volume(0.1)
     pygame.mixer.music.play(True)
 
