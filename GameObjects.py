@@ -589,8 +589,11 @@ class Person(RotatingGameObject):
             x = 1
         elif 90 < self.angle < 180 or -90 > self.angle > -180:
             x = -1
-        image = pygame.transform.rotozoom(self.bullet, self.angle, 0.1)
-        speed_move = (1000 * abs(self.vector[0]), 1000 * abs(self.vector[1]))
+
+        ax = random.randrange(-25, 25)
+
+        image = pygame.transform.rotozoom(self.bullet, self.angle + ax, 0.1)
+        speed_move = (1000 * abs(self.vector[0] - ax / 360), 1000 * abs(self.vector[1] - ax / 360))
 
         return GameObject(self.rect.center,
                           path_image=image,

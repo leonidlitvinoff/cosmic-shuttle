@@ -153,7 +153,7 @@ def play_function(difficulty, value):
             if keys[pygame.K_s]:
                 y += 1
             if buttons[0]:
-                if counter_shot % 4:
+                if not counter_shot % 2:
                     person.shoot().add(all_sprite, visible_objects, bullet)
 
             if counter_shot == 999:
