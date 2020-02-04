@@ -48,7 +48,7 @@ def play_function(difficulty, value):
     global main_menu
     global clock
 
-    main_menu.reset(True)
+    pygame.mixer.music.pause()
 
     # Заглушка
     value = None
@@ -238,6 +238,9 @@ def play_function(difficulty, value):
                                        WINDOW_SIZE), (0, 0))
     pygame.display.flip()
     pygame.time.wait(2500)
+
+    main_menu.reset(True)
+    pygame.mixer.music.play(True)
     return
 
 
@@ -260,6 +263,11 @@ def main(test=False):
 
     WINDOW_SIZE = surface.get_size()
     clock = pygame.time.Clock()
+
+    cat = pygame.transform.scale(pygame.image.load('C:\\Users\\stf20\\OneDrive\\Desktop\\Яндекс Лицей\\3.png'), (1000, 250))
+
+    cat = GameObjects.GameObject((0, 0), cat, animation=(4, 1, 1, 1))
+    surface.blit(cat.get_surface(), cat.get_position())
 
     # Содание меню
     play_menu = pygameMenu.Menu(surface,
@@ -353,24 +361,23 @@ def main(test=False):
     main_menu.add_option('Play', play_menu)
     main_menu.add_option('About', about_menu)
     main_menu.add_option('Quit', pygameMenu.events.EXIT)
-    main_menu.set_fps(FPS)
+
+    pygame.mixer.music.load('C:\\Users\\stf20\\Downloads\\lolka.ogg')
+    pygame.mixer.music.set_volume(0.1)
+    pygame.mixer.music.play(True)
+
+
 
     # Игровой цикл
     while True:
-        fill_background()
-
         # обработка событий
-        events = pygame.event.get()
-        for event in events:
-            if event.type == pygame.QUIT:
-                exit()
-        main_menu.mainloop(events, disable_loop=test)
+        cat.update()
+
+        main_menu.mainloop(disable_loop=True)
+        surface.blit(cat.get_surface(), cat.get_position())
 
         # Обновление экрана
-        clock.tick(FPS)
         pygame.display.flip()
-        if test:
-            break
 
 
 main()
